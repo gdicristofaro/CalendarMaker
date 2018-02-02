@@ -1,0 +1,50 @@
+{
+  "name": "calendarmaker",
+  "version": "1.0.0",
+  "description": "makes a powerpoint version of a calendar",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "deploy": "gh-pages -d build",
+    "start": "webpack-dev-server --inline --progress --colors",
+    "watch": "webpack --watch",
+    "open": "open http://localhost:8080/webpack-dev-server/index.html"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@types/react": "^15.0.35",
+    "@types/react-dom": "^15.5.1",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "moment": "2.20.1",
+    "@types/moment": "2.13.0",
+    "jquery": "3.2.1",
+    "@types/jquery": "3.2.17",
+    "pptxgenjs": "1.10.0",
+    "ical": "0.5.0",
+    "jszip": "3.1.5",
+    "image-size": "0.6.2",
+    "moment-holiday": "1.5.1",
+    "@types/moment-holiday": "1.5.0",
+    "material-ui": "0.20.0",
+    "@types/material-ui": "0.20.1",
+    "@types/react-tap-event-plugin": "0.0.30",
+    "react-color": "2.13.8",
+    "@types/react-color": "2.13.3",
+    "downloadjs": "1.4.7",
+    "@types/downloadjs": "1.4.0",
+    "react-dropzone": "4.2.3",
+    "@types/react-dropzone": "4.2.0",
+    "gh-pages": "1.1.0"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.2.1",
+    "copy-webpack-plugin": "^4.0.1",
+    "file-loader": "^0.11.2",
+    "source-map-loader": "^0.2.1",
+    "typescript": "^2.4.1",
+    "webpack-dev-server": "^2.5.1",
+    "webpack": "^3.1.0"
+  }
+}
