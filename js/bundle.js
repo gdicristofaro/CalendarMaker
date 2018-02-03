@@ -34568,6 +34568,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const $ = __webpack_require__(156);
 const moment = __webpack_require__(2);
+const ParseNumYears_1 = __webpack_require__(794);
 // information pertaining to the date
 class DateEntry {
     constructor(month, day, name, img) {
@@ -34589,7 +34590,7 @@ class Dimension {
 class PptxGen {
     constructor(settings, events, banners, year) {
         this.Settings = $.extend(true, {}, PptxGen.DefaultSettings, settings);
-        this.Events = events;
+        this.Events = PptxGen.convertDateEntries(events, year);
         this.Year = year;
         this.Banners = banners;
     }
@@ -34952,6 +34953,12 @@ class PptxGen {
                 // add events with image
                 yield PptxGen.addEvents(slide, options.eventOpts, dates[dt], dim);
             }
+        });
+    }
+    static convertDateEntries(events, year) {
+        return events.map((dateEntry) => {
+            let newString = ParseNumYears_1.default.ParseNumYears(dateEntry.name, year);
+            return new DateEntry(dateEntry.month, dateEntry.day, newString, dateEntry.img);
         });
     }
     create() {
@@ -64266,9 +64273,9 @@ const TextField_1 = __webpack_require__(94);
 const Paper_1 = __webpack_require__(33);
 const ImageLoader_1 = __webpack_require__(142);
 const PptxGen_1 = __webpack_require__(267);
-const ParseHoliday_1 = __webpack_require__(794);
-const download = __webpack_require__(795);
-const Model_1 = __webpack_require__(796);
+const ParseHoliday_1 = __webpack_require__(795);
+const download = __webpack_require__(796);
+const Model_1 = __webpack_require__(797);
 const Dialog_1 = __webpack_require__(266);
 const FlatButton_1 = __webpack_require__(265);
 var moment;
@@ -87447,6 +87454,56 @@ webpackContext.id = 793;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+class ParseNumYears {
+    // taken from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_function_as_a_parameter
+    static GetReplacerFunct(curYear) {
+        curYear = Math.floor(curYear);
+        return (match, estYear) => {
+            let yearDiff = curYear - parseInt(estYear, 10);
+            return ParseNumYears.NumToOrdinalStr(yearDiff);
+        };
+    }
+    static ParseNumYears(eventStr, curYear) {
+        return eventStr.replace(ParseNumYears.EST_TAG_REGEX, ParseNumYears.GetReplacerFunct(curYear));
+    }
+    // find established tag {est:[0-9]{4}}
+    // find ordinal strings: ([0-9]{1,2})(?:st|nd|rd|th)
+    static NumToOrdinalStr(num) {
+        // number should be an integer; truncate appropriately
+        num = Math.floor(num);
+        let onesPlace = num % 10;
+        let tensPlace = (num / 10) % 10;
+        if (tensPlace == 1)
+            return num.toString() + 'th';
+        let ending = '';
+        switch (onesPlace) {
+            case 1:
+                ending = 'st';
+                break;
+            case 2:
+                ending = 'nd';
+                break;
+            case 3:
+                ending = 'rd';
+                break;
+            default:
+                ending = 'th';
+                break;
+        }
+        return num.toString() + ending;
+    }
+}
+ParseNumYears.EST_TAG_REGEX = /{est:([0-9]{4})}/g;
+exports.default = ParseNumYears;
+
+
+/***/ }),
+/* 795 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const moment = __webpack_require__(2);
 function arrayify(arr) {
     if (arr && arr.constructor !== Array) {
@@ -87635,11 +87692,10 @@ ParseHoliday.parserExtensions = [
     ParseHoliday.EasterParser
 ];
 exports.default = ParseHoliday;
-window.parseHolidayz = ParseHoliday.parse;
 
 
 /***/ }),
-/* 795 */
+/* 796 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//download.js v4.2, by dandavis; 2008-2016. [MIT] see http://danml.com/download.html for tests/usage
@@ -87815,7 +87871,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 796 */
+/* 797 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
