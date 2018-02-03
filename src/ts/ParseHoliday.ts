@@ -182,5 +182,3 @@ export default class ParseHoliday {
         //return days;
     }   
 }
-
-(window as any).parseHolidayz = ParseHoliday.parse;

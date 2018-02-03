@@ -1,5 +1,6 @@
 import * as $ from 'jquery';
 import * as moment from 'moment';
+import ParseNumYears from './ParseNumYears';
 
 declare var PptxGenJS : any;
 
@@ -584,9 +585,16 @@ export default class PptxGen {
 
     constructor(settings, events: DateEntry[], banners:string[], year: number) {
         this.Settings = $.extend(true, {}, PptxGen.DefaultSettings, settings);
-        this.Events = events;
+        this.Events = PptxGen.convertDateEntries(events, year);
         this.Year = year;
         this.Banners = banners;
+    }
+
+    private static convertDateEntries(events: DateEntry[], year: number) : DateEntry[] {
+        return events.map((dateEntry) => {
+            let newString = ParseNumYears.ParseNumYears(dateEntry.name, year);
+            return new DateEntry(dateEntry.month, dateEntry.day, newString, dateEntry.img);
+        });
     }
 
     public async create() {
