@@ -198,6 +198,7 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
         let dayOfWeekRegex = /([0-9]{1,2})\/\(([0-9]),([0-9])\)/g;
         let dayOfWeekMatch = dayOfWeekRegex.exec(dateString);
         if (dayOfWeekMatch) {
+            console.log("dayOfWeekMatch", dayOfWeekMatch)
             return {
                 dateType: DateType.WeekdayMonth,
                 month: parseInt(dayOfWeekMatch[1],10),
