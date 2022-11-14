@@ -1,14 +1,14 @@
 import * as React from 'react';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import TextField from 'material-ui/TextField';
-import {ImageLoader, ImageLoaderProps} from './ImageLoader';
-import IconButton from 'material-ui/IconButton';
-import ActionDelete from 'material-ui/svg-icons/action/delete';
-import DatePicker from 'material-ui/DatePicker';
-import Paper from 'material-ui/Paper';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import ImageLoader from './ImageLoader';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import Paper from '@mui/material/Paper';
 import * as $ from 'jquery';
-import { SmallLabel } from './SmallLabel';
+import SmallLabel from './SmallLabel';
 import {DateEventModel} from '../Model';
 
 export interface DateEventProps { 
@@ -19,10 +19,10 @@ export interface DateEventProps {
 
 export interface DateTypeInfo {
     dateType: DateType,
-    month: number,
-    weekday: number,
-    day: number,
-    week: number
+    month?: number,
+    weekday?: number,
+    day?: number,
+    week?: number
 }
 
 export interface DateEventState {
@@ -46,7 +46,7 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
     constructor(props: DateEventProps) {
         super(props);
 
-        let dateData = DateEvent.matchDate(this.props.Model.DateString).dateType;
+        let dateData = DateEvent.matchDate(this.props.Model.dateString).dateType;
         this.state = {dateType: dateData};
     }
 
@@ -55,7 +55,7 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
      * @param newDateString the new date string
      */
     private onDateString(newDateString: string, forceUpdate: boolean = true) : void {
-        this.props.Model.DateString = newDateString;
+        this.props.Model.dateString = newDateString;
         this.props.onUpdate(); 
 
         if (forceUpdate)
@@ -82,7 +82,7 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
                     hintText="Select Date For Event"
                     disableYearSelection={true}
                     formatDate={(date:Date) => `${DateEvent.months[date.getMonth()]} ${date.getDate()}`}
-                    onChange={(n, date:Date) => this.onDateString(`${date.getMonth() + 1}/${date.getDate()}`) }
+                    onChange={(value: unknown, keyboardInputValue?: string) => this.onDateString(`${date.getMonth() + 1}/${date.getDate()}`) }
                     defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
                 />
             </div>
@@ -233,7 +233,7 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
 
 
     render() {
-        let dateString = this.props.Model.DateString;
+        let dateString = this.props.Model.dateString;
 
         let matchRecord = DateEvent.matchDate(dateString);
         
@@ -283,8 +283,8 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
             <div style={DateEvent.CELL_STYLE}>
                 <TextField 
                     hintText="Name" 
-                    value={this.props.Model.EventName} 
-                    onChange={(e,v) => {this.props.Model.EventName = v; this.props.onUpdate(); this.forceUpdate();}} 
+                    value={this.props.Model.eventName} 
+                    onChange={(e,v) => {this.props.Model.eventName = v; this.props.onUpdate(); this.forceUpdate();}} 
                     floatingLabelText="Event Name" 
                 />
             </div>
@@ -311,8 +311,8 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
             <div style={DateEvent.CELL_STYLE}>
                 <ImageLoader 
                     title="Choose Image..." 
-                    initialDataUrl={this.props.Model.ImageDataUrl} 
-                    onDataUrl={(durl) => {this.props.Model.ImageDataUrl = durl; this.props.onUpdate(); this.forceUpdate();}}
+                    initialDataUrl={this.props.Model.imageDataUrl} 
+                    onDataUrl={(durl) => {this.props.Model.imageDataUrl = durl; this.props.onUpdate(); this.forceUpdate();}}
                 />
             </div>
             <div style={DateEvent.CELL_STYLE}>

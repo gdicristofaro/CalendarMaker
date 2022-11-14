@@ -21,8 +21,8 @@ export class SettingsModel {
 }
 
 
-export class DateEventModel {
-    EventName: string;
-    ImageDataUrl: string;
-    DateString: string;
+export interface DateEventModel {
+    eventName: string;
+    imageDataUrl: string;
+    dateString: string;
 }

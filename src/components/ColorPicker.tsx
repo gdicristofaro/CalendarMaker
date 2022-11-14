@@ -1,76 +1,68 @@
 import * as React from 'react';
-import { SketchPicker, SketchPickerProps, Color } from 'react-color';
+import { useState } from 'react';
+import { SketchPicker } from 'react-color';
 
-export interface ColorPickerProps { onUpdate: (hexColor: string) => void, initialColor: string }
-export interface ColorPickerState { displayColorPicker: boolean }
+
+const ROOT_STYLE = {
+    color: {
+      width: '36px',
+      height: '14px',
+      borderRadius: '2px'
+    },
+    swatch: {
+      padding: '5px',
+      background: '#fff',
+      borderRadius: '1px',
+      boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
+      display: 'inline-block',
+      cursor: 'pointer',
+    },
+    popover: {
+      position: 'absolute' as 'absolute',
+      zIndex: 2,
+    },
+    cover: {
+      position: 'fixed' as 'fixed',
+      top: '0px',
+      right: '0px',
+      bottom: '0px',
+      left: '0px',
+    }
+};
 
 // 'HelloProps' describes the shape of props.
 // State is never set so we use the 'undefined' type.
-export class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
+const ColorPicker = (props: {
+    onUpdate: (hexColor: string) => void,
+    initialColor: string 
+}) => {
+    let [display, setDisplay] = useState<boolean>();
+    let [color, setColor] = useState<string>(props.initialColor);
 
-    constructor(props : ColorPickerProps){
-        super(props);
-        // set initial state
-        this.state = {
-            displayColorPicker: false
-        };
-    }
-
-    handleClick = () => {
-        this.setState({ displayColorPicker: !this.state.displayColorPicker })
-    };
-    
-    handleClose = () => {
-        this.setState({ displayColorPicker: false })
+    let updatedColor = {
+        ...ROOT_STYLE.color,
+        background: `#${color}`
     };
 
-    render() {
-        //const color = 
+    let styles = { ...ROOT_STYLE, updatedColor };
 
-        const styles = {
-              color: {
-                width: '36px',
-                height: '14px',
-                borderRadius: '2px',
-                background: `#${this.props.initialColor}`,
-              },
-              swatch: {
-                padding: '5px',
-                background: '#fff',
-                borderRadius: '1px',
-                boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
-                display: 'inline-block',
-                cursor: 'pointer',
-              },
-              popover: {
-                position: 'absolute' as 'absolute',
-                zIndex: 2,
-              },
-              cover: {
-                position: 'fixed' as 'fixed',
-                top: '0px',
-                right: '0px',
-                bottom: '0px',
-                left: '0px',
-              }
-          };
-
-        const onChange = (c) => {
-            this.props.onUpdate(c.hex.substring(1));
-        }
-
-        return (
+    return (
         <div>
-            <div style={ styles.swatch } onClick={ this.handleClick }>
+            <div style={ styles.swatch } onClick={ () => setDisplay(!display) }>
             <div style={ styles.color } />
             </div>
-            { this.state.displayColorPicker ? 
+            { display ? 
                 <div style={ styles.popover }>
-                    <div style={ styles.cover } onClick={ this.handleClose }/>
-                    <SketchPicker color={styles.color.background} disableAlpha={true} onChangeComplete = { onChange } />
+                    <div style={ styles.cover } onClick={ () => setDisplay(false) }/>
+                    <SketchPicker 
+                        color={(styles as any).color.background} 
+                        disableAlpha={true} 
+                        onChangeComplete = { (c: any) => setColor(c.hex.substring(1)) } 
+                    />
                 </div> : 
                 null 
             }
         </div>);
-    }
 }
+
+export default ColorPicker;

@@ -1,21 +1,22 @@
 import * as React from 'react';
-import {Tabs, Tab} from 'material-ui/Tabs'; 
-import RaisedButton from 'material-ui/RaisedButton';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import FlatButton from "@mui/material/Button"
+import RaisedButton from "@mui/material/Button"
 import {AllFormatSettings, AllFormatSettingsProps} from './SettingsItem';
 import {DateEvent, DateEventProps} from './DateEvent';
-import TextField from 'material-ui/TextField';
-import Paper from 'material-ui/Paper';
-import { ImageLoader } from './ImageLoader';
+import TextField from '@mui/material/TextField';
+import Paper from '@mui/material/Paper';
+import ImageLoader from './ImageLoader';
 import PptxGen, { DateEntry } from '../PptxGen'
 import ParseHoliday from '../ParseHoliday';
 import * as download from 'downloadjs';
 import {DateEventModel, SettingsModel} from '../Model';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
+import Dialog from '@mui/material/Dialog';
 
 var moment : any;
 
-export class MainComponentState {
+export interface MainComponentState {
     settings: SettingsModel;
     showResetDialog: boolean;
 }
@@ -91,8 +92,8 @@ export class MainComponent extends React.Component<undefined, MainComponentState
             var s = this.state.settings;
             var year = s.Year;
             var events = s.Events.map((val) => {
-                var date = ParseHoliday.parse(val.DateString + "/" + year.toString(), undefined);
-                return new DateEntry(date.getMonth() + 1, date.getDate(), val.EventName, val.ImageDataUrl);
+                var date = ParseHoliday.parse(val.dateString + "/" + year.toString(), undefined);
+                return new DateEntry(date.getMonth() + 1, date.getDate(), val.eventName, val.imageDataUrl);
             });
 
             let banners = DateEvent.months.map((val) => s.Banners[val]);
