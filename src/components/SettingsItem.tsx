@@ -37,94 +37,112 @@ const SettingsItem = (props: {
     title: string,
     hint?: string,
     setter: (item: any) => void,
-    value: any,
+    initialValue: any,
     type: SettingsType
 }) => {
     
-    let textFieldComponent = (
-            <TextField
-                type={type}
-                value={props.value}
-                floatingLabelText= {props.title}
-                hintText={props.hint}
-                onChange={(e: any, v: string) => { props.setter(v); setValue(v);}}
-            />
-        );
+    let [value, setValue] = useState(props.initialValue);
 
-    // getMenu(choices : {text: string, value: any}[]) {
-    //     let items = choices.map((v,i) => (<MenuItem value={v.value} primaryText={v.text} key={"menuItem" + i.toString()} />));
+    let baseComponent = undefined;
 
-    //     return (
-    //         <div>
-    //             <SmallLabel Text={this.props.Title + (this.props.Hint ? (" (" + this.props.Hint + ")") : "")} />
-    //             <DropDownMenu 
-    //                 style={{marginLeft: '-24px', marginTop: '-10px'}} 
-    //                 value={this.props.Value} 
-    //                 onChange={(e,i,d) => {this.props.Setter(d); this.setState({Value: d}); }}
-    //             >
-    //                 {items}
-    //             </DropDownMenu>
-    //         </div>
-    //     );       
-    // }
+    switch (props.type) {
+        case SettingsType.Boolean:
+            baseComponent = (
+                <div>
+                    <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
+                    <Checkbox
+                        checked={value}
+                        onChange={(evt, checked) => {
+                            props.setter(checked);
+                            setValue(checked);
+                        }}
+                    />
+                </div>
+            );
+            break;
+        case SettingsType.HorizontalAlign:
+        case SettingsType.VerticalAlign:
+            let options = (props.type == SettingsType.HorizontalAlign) ?
+            [
+                {text: "Left", value: HorizontalAlign.left},
+                {text: "Center", value: HorizontalAlign.center},
+                {text: "Right", value: HorizontalAlign.right}
+            ] :
+            [
+                {text: "Top", value: VerticalAlign.top},
+                {text: "Middle", value: VerticalAlign.middle},
+                {text: "Bottom", value: VerticalAlign.bottom}
+            ];
 
-    // getBaseComponent() {
-    //     switch (this.props.Type) {
-    //         case SettingsType.Boolean:
-    //             return (
-    //                 <div>
-    //                     <SmallLabel Text={this.props.Title + (this.props.Hint ? (" (" + this.props.Hint + ")") : "")} />
-    //                     <Checkbox
-    //                         checked={this.props.Value}
-    //                         onCheck={() => { 
-    //                             let val = !this.props.Value; 
-    //                             this.props.Setter(val);
-    //                         }}
-    //                     />
-    //                 </div>
-    //             );
-                
-    //         case SettingsType.HorizontalAlign:
-    //             return this.getMenu([
-    //                 {text: "Left", value: HorizontalAlign.left},
-    //                 {text: "Center", value: HorizontalAlign.center},
-    //                 {text: "Right", value: HorizontalAlign.right}]);
+            let items = options.map((v,i) => (
+                <MenuItem value={v.value} key={"menuItem" + i.toString()}>v.text</MenuItem>
+            ));
+    
+            baseComponent = (
+                <div>
+                    <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
+                    <Select 
+                        style={{marginLeft: '-24px', marginTop: '-10px'}} 
+                        value={value} 
+                        onChange={evt => {
+                            props.setter(evt.target.value);
+                            setValue(evt.target.value);
+                        }}
+                    >
+                        {items}
+                    </Select>
+                </div>
+            ); 
+            break;
 
-    //         case SettingsType.VerticalAlign:
-    //             return this.getMenu([
-    //                 {text: "Top", value: VerticalAlign.top},
-    //                 {text: "Middle", value: VerticalAlign.middle},
-    //                 {text: "Bottom", value: VerticalAlign.bottom}]);
+        case SettingsType.Color:
+            baseComponent = (
+                <div>
+                    <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
+                    <ColorPicker
+                        initialColor={value}
+                        onUpdate={(v) => {
+                            props.setter(v);
+                            setValue(v);
+                         }}
+                    />
+                </div>
+            );
+            break;
 
-    //         case SettingsType.Color:
-    //             return (
-    //                 <div>
-    //                     <SmallLabel Text={this.props.Title + (this.props.Hint ? (" (" + this.props.Hint + ")") : "")} />
-    //                     <ColorPicker
-    //                         initialColor={this.props.Value}
-    //                         onUpdate={(v) => {this.props.Setter(v); }}
-    //                     />
-    //                 </div>
-    //             );
-    //         case SettingsType.Image:
-    //             return (
-    //                 <ImageLoader
-    //                     initialDataUrl={this.props.Value}
-    //                     onDataUrl={this.props.Setter}
-    //                     title={this.props.Title}
-    //                 />
-    //             );
-    //         case SettingsType.Number: 
-    //             return this.getTextFieldComp("number")
-    //         case SettingsType.Text:
-    //         default:
-    //             return this.getTextFieldComp(undefined);
-    //     }
-    // }
+        case SettingsType.Image:
+            baseComponent = (
+                <ImageLoader
+                    initialDataUrl={value}
+                    onDataUrl={(v) => {
+                        props.setter(v);
+                        setValue(v);
+                    }}
+                    title={props.title}
+                />
+            );
+            break;
+
+        case SettingsType.Number: 
+        case SettingsType.Text:
+        default:
+            let textFieldType = props.type == SettingsType.Number ? "number" : undefined;
+
+            baseComponent = (<TextField
+                type={textFieldType}
+                value={value}
+                title={props.title}
+                onChange={(e) => { 
+                    props.setter(e.target.value); 
+                    setValue(e.target.value);
+                }}
+            />);
+            break;
+    }
 
     return (
         <div style={{margin: '10px 0px'}}>
-            {this.getBaseComponent()}
+            {baseComponent}
         </div>
     )
 }
@@ -140,13 +158,13 @@ const AllFormatSettings = (props: {
 }) => {
     
 
-    let getField = (parentObject: {[key: string]: any}, key: string, type: SettingsType, title: string, hintText?: string = undefined) => {
+    let getField = (parentObject: {[key: string]: any}, key: string, type: SettingsType, title: string, hintText: string | undefined = undefined) => {
         return (
             <div className="SettingsItem">
                 <SettingsItem
                     title={title}
                     setter={(v) => { parentObject[key] = v; props.onChange(parentObject); }}
-                    value={parentObject[key]}
+                    initialValue={parentObject[key]}
                     type={type}
                     hint={hintText}
                 />
@@ -154,13 +172,13 @@ const AllFormatSettings = (props: {
         );
     }
 
-    let getPt = (parentObject: {[key: string]: any}, key: string, title: string, hintText?: string = undefined) => {
+    let getPt = (parentObject: {[key: string]: any}, key: string, title: string, hintText: string | undefined = undefined) => {
         return (
             <div className="SettingsItem">
                 <SettingsItem
                     title={title}
                     setter={(v) => { parentObject[key] = v.toString(); props.onChange(parentObject); }}
-                    value={parseInt(parentObject[key], 10)}
+                    initialValue={parseInt(parentObject[key], 10)}
                     type={SettingsType.Number}
                     hint={hintText}
                 />

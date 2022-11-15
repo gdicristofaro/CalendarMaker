@@ -11,22 +11,12 @@ import * as $ from 'jquery';
 import SmallLabel from './SmallLabel';
 import {DateEventModel} from '../Model';
 
-export interface DateEventProps { 
-    onDelete: () => void,
-    Model: DateEventModel,
-    onUpdate() : void
-}
-
 export interface DateTypeInfo {
     dateType: DateType,
     month?: number,
     weekday?: number,
     day?: number,
     week?: number
-}
-
-export interface DateEventState {
-    dateType: DateType
 }
 
 enum DateType {
@@ -36,12 +26,78 @@ enum DateType {
     Custom
 }
 
-// defines a calendar event
-export class DateEvent extends React.Component<DateEventProps, DateEventState> {
 
-    public static readonly months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    private static days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    private static weekNumber = ["1st","2nd","3rd","4th","5th"];
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const weekNumber = ["1st","2nd","3rd","4th","5th"];
+
+
+const matchDate = (dateString: string) : DateTypeInfo => { 
+    // match day of week before date
+    let beforeDateRegex = /([0-9]{1,2})\/\(([0-9]),\[-([0-9]{1,2})\]\)/g;
+    let beforeDateMatch = beforeDateRegex.exec(dateString);
+    if (beforeDateMatch) {
+        return {
+            dateType: DateType.WeekdayBefore,
+            month: parseInt(beforeDateMatch[1],10),
+            weekday: parseInt(beforeDateMatch[2],10),
+            day: parseInt(beforeDateMatch[3],10),
+            week: undefined
+        };
+    }
+
+    // match day of week of month
+    let dayOfWeekRegex = /([0-9]{1,2})\/\(([0-9]),([0-9])\)/g;
+    let dayOfWeekMatch = dayOfWeekRegex.exec(dateString);
+    if (dayOfWeekMatch) {
+        console.log("dayOfWeekMatch", dayOfWeekMatch)
+        return {
+            dateType: DateType.WeekdayMonth,
+            month: parseInt(dayOfWeekMatch[1],10),
+            weekday: parseInt(dayOfWeekMatch[2],10),
+            day: undefined,
+            week: parseInt(dayOfWeekMatch[3],10)
+        };
+    }
+
+    // match date 
+    let dateRegex = /([0-9]{1,2})\/([0-9]{1,2})/g;
+    let dateMatch = dateRegex.exec(dateString);
+    if (dateMatch) {
+        return {
+            dateType: DateType.Date,
+            month: parseInt(dateMatch[1],10),
+            day: parseInt(dateMatch[2],10),
+            weekday: undefined,
+            week: undefined
+        };
+    }
+
+    return {
+        dateType: DateType.Custom,
+        month: undefined,
+        day: undefined,
+        weekday: undefined,
+        week: undefined
+    };
+}
+
+// for cells containing text changing elements
+const CELL_STYLE = {
+    padding: '0px 10px',
+    display: 'table-cell',
+    verticalAlign: 'bottom',
+};
+
+
+
+// defines a calendar event
+const DateEvent = (props: {
+    onDelete: () => void,
+    Model: DateEventModel,
+    onUpdate() : void
+}) => {
+
 
     constructor(props: DateEventProps) {
         super(props);
@@ -62,13 +118,7 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
             this.forceUpdate();
     }
 
-    // for cells containing text changing elements
-    private static CELL_STYLE = {
-        padding: '0px 10px',
-        display: 'table-cell',
-        verticalAlign: 'bottom',
-    };
-    
+
     /**
      * generates a date selector (i.e. January 10)
      * @param month the month (1 is January)
@@ -180,105 +230,54 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
         );
     }
 
-    private static matchDate(dateString: string) : DateTypeInfo { 
-        // match day of week before date
-        let beforeDateRegex = /([0-9]{1,2})\/\(([0-9]),\[-([0-9]{1,2})\]\)/g;
-        let beforeDateMatch = beforeDateRegex.exec(dateString);
-        if (beforeDateMatch) {
-            return {
-                dateType: DateType.WeekdayBefore,
-                month: parseInt(beforeDateMatch[1],10),
-                weekday: parseInt(beforeDateMatch[2],10),
-                day: parseInt(beforeDateMatch[3],10),
-                week: undefined
-            };
-        }
 
-        // match day of week of month
-        let dayOfWeekRegex = /([0-9]{1,2})\/\(([0-9]),([0-9])\)/g;
-        let dayOfWeekMatch = dayOfWeekRegex.exec(dateString);
-        if (dayOfWeekMatch) {
-            console.log("dayOfWeekMatch", dayOfWeekMatch)
-            return {
-                dateType: DateType.WeekdayMonth,
-                month: parseInt(dayOfWeekMatch[1],10),
-                weekday: parseInt(dayOfWeekMatch[2],10),
-                day: undefined,
-                week: parseInt(dayOfWeekMatch[3],10)
-            };
-        }
 
-        // match date 
-        let dateRegex = /([0-9]{1,2})\/([0-9]{1,2})/g;
-        let dateMatch = dateRegex.exec(dateString);
-        if (dateMatch) {
-            return {
-                dateType: DateType.Date,
-                month: parseInt(dateMatch[1],10),
-                day: parseInt(dateMatch[2],10),
-                weekday: undefined,
-                week: undefined
-            };
-        }
+    let dateString = this.props.Model.dateString;
 
-        return {
-            dateType: DateType.Custom,
-            month: undefined,
-            day: undefined,
-            weekday: undefined,
-            week: undefined
-        };
+    let matchRecord = DateEvent.matchDate(dateString);
+    
+    let month = matchRecord.month ? matchRecord.month : 1;
+    let day = matchRecord.day ? matchRecord.day : 1;
+    let week = matchRecord.week ? matchRecord.week : 1;
+    let weekday = matchRecord.weekday ? matchRecord.weekday : 0;
+
+    let DateSelector;
+    switch (state.dateType) {
+        case DateType.Date:
+            DateSelector = getDateSelector(month, day);
+            break;
+        case DateType.WeekdayMonth:
+            DateSelector = getWeekdayMonthSelector(month, week, weekday);
+            break;
+        case DateType.WeekdayBefore:
+            DateSelector = getWeekdayBeforeSelector(month, day, weekday);
+            break;
+        case DateType.Custom:
+        default:
+            DateSelector = getCustomSelector(dateString);
     }
 
-
-
-    render() {
-        let dateString = this.props.Model.dateString;
-
-        let matchRecord = DateEvent.matchDate(dateString);
-        
-        let month = matchRecord.month ? matchRecord.month : 1;
-        let day = matchRecord.day ? matchRecord.day : 1;
-        let week = matchRecord.week ? matchRecord.week : 1;
-        let weekday = matchRecord.weekday ? matchRecord.weekday : 0;
-
-        let DateSelector;
-        switch (this.state.dateType) {
-            case DateType.Date:
-                DateSelector = this.getDateSelector(month, day);
-                break;
+    let dropdownChange = (e,i,val) => {
+        let newDateString;
+        switch (val) {
             case DateType.WeekdayMonth:
-                DateSelector = this.getWeekdayMonthSelector(month, week, weekday);
+                newDateString = `${month}/(${weekday},${week})`;
                 break;
             case DateType.WeekdayBefore:
-                DateSelector = this.getWeekdayBeforeSelector(month, day, weekday);
+                newDateString = `${month}/(${weekday},[-${day}])`;
                 break;
             case DateType.Custom:
-            default:
-                DateSelector = this.getCustomSelector(dateString);
-        }
-
-        let dropdownChange = (e,i,val) => {
-            let newDateString;
-            switch (val) {
-                case DateType.WeekdayMonth:
-                    newDateString = `${month}/(${weekday},${week})`;
-                    break;
-                case DateType.WeekdayBefore:
-                    newDateString = `${month}/(${weekday},[-${day}])`;
-                    break;
-                case DateType.Custom:
-                case DateType.Date:
-                    newDateString = `${month}/${day}`;
-                    break;
-            };
-
-            console.log(newDateString);
-            this.onDateString(newDateString, false);
-            this.setState({dateType: val});
+            case DateType.Date:
+                newDateString = `${month}/${day}`;
+                break;
         };
 
-        return (
+        console.log(newDateString);
+        onDateString(newDateString, false);
+        setState({dateType: val});
+    };
+
+    return (
         <div style={{padding: '10px', margin: '10px'}}>
             <div style={DateEvent.CELL_STYLE}>
                 <TextField 
@@ -293,17 +292,17 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
                 position: 'relative' })}
             >
                 <SmallLabel Text="Date Type" />
-                <DropDownMenu 
+                <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}}
                     value={this.state.dateType} 
                     onChange={dropdownChange}
                     autoWidth={true}
                 >
-                    <MenuItem value={DateType.Date} primaryText="Date" />
-                    <MenuItem value={DateType.WeekdayMonth} primaryText="Day of the Week for Week Number of Month"/>
-                    <MenuItem value={DateType.WeekdayBefore} primaryText="Day of the Week Before Date" />
-                    <MenuItem value={DateType.Custom} primaryText="Custom Moment-Holiday Text" />
-                </DropDownMenu>
+                    <MenuItem value={DateType.Date}>Date</MenuItem>
+                    <MenuItem value={DateType.WeekdayMonth}>Day of the Week for Week Number of Month</MenuItem>
+                    <MenuItem value={DateType.WeekdayBefore}>Day of the Week Before Date</MenuItem>
+                    <MenuItem value={DateType.Custom}>Custom Moment-Holiday Text</MenuItem>
+                </Select>
             </div>
             <div style={DateEvent.CELL_STYLE}>
                 {DateSelector}
@@ -324,6 +323,8 @@ export class DateEvent extends React.Component<DateEventProps, DateEventState> {
                     <ActionDelete />
                 </IconButton>
             </div>
-        </div>);
-    }
-}
+        </div>
+    );
+};
+
+export default DateEvent;
