@@ -10,6 +10,7 @@ import Paper from '@mui/material/Paper';
 import * as $ from 'jquery';
 import SmallLabel from './SmallLabel';
 import {DateEventModel} from '../Model';
+import { useState } from 'react';
 
 export interface DateTypeInfo {
     dateType: DateType,
@@ -27,9 +28,9 @@ enum DateType {
 }
 
 
-const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const weekNumber = ["1st","2nd","3rd","4th","5th"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const WEEK_NUMBER = ["1st","2nd","3rd","4th","5th"];
 
 
 const matchDate = (dateString: string) : DateTypeInfo => { 
@@ -82,6 +83,149 @@ const matchDate = (dateString: string) : DateTypeInfo => {
     };
 }
 
+
+/**
+ * when date string changes, should be called
+ * @param newDateString the new date string
+ */
+// const onDateString = (newDateString: string, forceUpdate: boolean = true) => {
+//     props.model.dateString = newDateString;
+//     props.onUpdate(); 
+
+//     if (forceUpdate)
+//         forceUpdate();
+// }
+
+
+/**
+ * generates a date selector (i.e. January 10)
+ * @param month the month (1 is January)
+ * @param day the day of the month
+ */
+const getDateSelector = (month: number, day: number) => {
+    return (
+        <div style={CELL_STYLE}>
+            <DatePicker
+                floatingLabelText="Date for Event"
+                hintText="Select Date For Event"
+                disableYearSelection={true}
+                formatDate={(date:Date) => `${MONTHS[date.getMonth()]} ${date.getDate()}`}
+                onChange={(value: unknown, keyboardInputValue?: string) => onDateString(`${date.getMonth() + 1}/${date.getDate()}`) }
+                defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
+            />
+        </div>
+    );
+}
+
+
+/**
+ * generates a weekday of week of month selector (i.e. 3rd Sunday of May)
+ * @param month the month (1 is January)
+ * @param weekNumber the week number (1 is 1st week)
+ * @param dayOfWeek the day of the week (0 is Sunday)
+ */
+const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: number) => {
+    return (
+        <div>
+            <div style={CELL_STYLE}>
+                <SmallLabel text="Month" />
+                <Select 
+                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
+                    value={month} 
+                    onSelect={(evt) => onDateString(`${val}/(${dayOfWeek},${weekNumber})`)}
+                >
+                    {MONTHS.map((val,ind) => { return (
+                        <MenuItem key={"monthSelector" + ind.toString()} value={ind + 1}>
+                            {val}
+                        </MenuItem> 
+                    )})}
+                </Select>
+            </div>
+            <div style={CELL_STYLE}>
+                <SmallLabel text="Day of the Week" />
+                <Select 
+                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
+                    value={dayOfWeek} 
+                    onSelect={(evt) => onDateString(`${month}/(${val},${weekNumber})`)}
+                >
+                    {DAYS.map((val,ind) => { return (
+                        <MenuItem key={"daySelector" + ind.toString()} value={ind}>
+                            {val}
+                        </MenuItem>
+                    )})}
+                </Select>
+            </div>
+            <div style={CELL_STYLE}>
+                <SmallLabel text="Week Number of Month" />
+                <Select 
+                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
+                    value={ weekNumber } 
+                    onSelect={(evt) => onDateString(`${month}/(${dayOfWeek},${val})`)}
+                >
+                    {WEEK_NUMBER.map((val,ind) => { return (
+                        <MenuItem key={"weekNumSelector" + ind.toString()} value={ind+1}>
+                            {val}
+                        </MenuItem>
+                    )})}
+                </Select>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * the day of the week before a certain day (i.e. Sunday before July 3rd)
+ * @param month the month (1 is January)
+ * @param day the day of the month
+ * @param dayOfWeek the day of the week (0 is Sunday)
+ */
+const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number) => {
+    return (
+        <div>
+            <div style={CELL_STYLE}>
+                <DatePicker
+                    floatingLabelText="Pick Date for Event"
+                    hintText="Select Date For Event"
+                    disableYearSelection={true}
+                    formatDate={(date:Date) => `${MONTHS[date.getMonth()]} ${date.getDate()}`}
+                    onChange={(n, date:Date) => onDateString(`${date.getMonth() + 1}/(${dayOfWeek},[-${date.getDate()}])`) }
+                    defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
+                />
+            </div>
+            <div style={CELL_STYLE}>
+                <SmallLabel text="Month" />
+                <Select 
+                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
+                    value={dayOfWeek} 
+                    onChange={(e,i,val) => onDateString(`${month}/(${val},[-${day}])`) }
+                >
+                    {DAYS.map((val,ind) => { return (
+                        <MenuItem value={ind} key={"weekdaybefore" + ind.toString()}>
+                            {val}
+                        </MenuItem>
+                    )})}
+                </Select>
+            </div>
+        </div>
+    );
+}
+
+
+const getCustomSelector = (dateString: string) => {
+    return (
+        <div style={CELL_STYLE}>
+            <TextField
+                hintText="Name" 
+                value={dateString} 
+                floatingLabelText="Custom Date"
+                onChange={(evt) => onDateString(d) }
+            />
+        </div>
+    );
+}
+
+
+
 // for cells containing text changing elements
 const CELL_STYLE = {
     padding: '0px 10px',
@@ -94,147 +238,16 @@ const CELL_STYLE = {
 // defines a calendar event
 const DateEvent = (props: {
     onDelete: () => void,
-    Model: DateEventModel,
+    model: DateEventModel,
     onUpdate() : void
 }) => {
-
-
-    constructor(props: DateEventProps) {
-        super(props);
-
-        let dateData = DateEvent.matchDate(this.props.Model.dateString).dateType;
-        this.state = {dateType: dateData};
-    }
-
-    /**
-     * when date string changes, this should be called
-     * @param newDateString the new date string
-     */
-    private onDateString(newDateString: string, forceUpdate: boolean = true) : void {
-        this.props.Model.dateString = newDateString;
-        this.props.onUpdate(); 
-
-        if (forceUpdate)
-            this.forceUpdate();
-    }
-
-
-    /**
-     * generates a date selector (i.e. January 10)
-     * @param month the month (1 is January)
-     * @param day the day of the month
-     */
-    private getDateSelector(month: number, day: number) {
-        return (
-            <div style={DateEvent.CELL_STYLE}>
-                <DatePicker
-                    floatingLabelText="Date for Event"
-                    hintText="Select Date For Event"
-                    disableYearSelection={true}
-                    formatDate={(date:Date) => `${DateEvent.months[date.getMonth()]} ${date.getDate()}`}
-                    onChange={(value: unknown, keyboardInputValue?: string) => this.onDateString(`${date.getMonth() + 1}/${date.getDate()}`) }
-                    defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
-                />
-            </div>
-        );
-    }
-
-
-    /**
-     * generates a weekday of week of month selector (i.e. 3rd Sunday of May)
-     * @param month the month (1 is January)
-     * @param weekNumber the week number (1 is 1st week)
-     * @param dayOfWeek the day of the week (0 is Sunday)
-     */
-    private getWeekdayMonthSelector(month: number, weekNumber: number, dayOfWeek: number) {
-        return (
-            <div>
-                <div style={DateEvent.CELL_STYLE}>
-                    <SmallLabel Text="Month" />
-                    <DropDownMenu 
-                        style={{marginLeft: '-24px', marginTop: '-10px'}} 
-                        value={month} 
-                        onChange={(e,i,val) => this.onDateString(`${val}/(${dayOfWeek},${weekNumber})`)}
-                    >
-                        {DateEvent.months.map((val,ind) => { return (<MenuItem key={"monthSelector" + ind.toString()} value={ind + 1} primaryText={val}/>)})}
-                    </DropDownMenu>
-                </div>
-                <div style={DateEvent.CELL_STYLE}>
-                    <SmallLabel Text="Day of the Week" />
-                    <DropDownMenu 
-                        style={{marginLeft: '-24px', marginTop: '-10px'}} 
-                        value={dayOfWeek} 
-                        onChange={(e,i,val) => this.onDateString(`${month}/(${val},${weekNumber})`)}
-                    >
-                        {DateEvent.days.map((val,ind) => { return (<MenuItem key={"daySelector" + ind.toString()} value={ind} primaryText={val}/>)})}
-                    </DropDownMenu>
-                </div>
-                <div style={DateEvent.CELL_STYLE}>
-                    <SmallLabel Text="Week Number of Month" />
-                    <DropDownMenu 
-                        style={{marginLeft: '-24px', marginTop: '-10px'}} 
-                        value={ weekNumber } 
-                        onChange={(e,i,val) => this.onDateString(`${month}/(${dayOfWeek},${val})`)}
-                    >
-                        {DateEvent.weekNumber.map((val,ind) => { return (<MenuItem key={"weekNumSelector" + ind.toString()} value={ind+1} primaryText={val}/>)})}
-                    </DropDownMenu>
-                </div>
-            </div>
-        );
-    }
-
-    /**
-     * the day of the week before a certain day (i.e. Sunday before July 3rd)
-     * @param month the month (1 is January)
-     * @param day the day of the month
-     * @param dayOfWeek the day of the week (0 is Sunday)
-     */
-    private getWeekdayBeforeSelector(month: number, day: number, dayOfWeek: number) {
-        return (
-            <div>
-                <div style={DateEvent.CELL_STYLE}>
-                    <DatePicker
-                        floatingLabelText="Pick Date for Event"
-                        hintText="Select Date For Event"
-                        disableYearSelection={true}
-                        formatDate={(date:Date) => `${DateEvent.months[date.getMonth()]} ${date.getDate()}`}
-                        onChange={(n, date:Date) => this.onDateString(`${date.getMonth() + 1}/(${dayOfWeek},[-${date.getDate()}])`) }
-                        defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
-                    />
-                </div>
-                <div style={DateEvent.CELL_STYLE}>
-                    <SmallLabel Text="Month" />
-                    <DropDownMenu 
-                        style={{marginLeft: '-24px', marginTop: '-10px'}} 
-                        value={dayOfWeek} 
-                        onChange={(e,i,val) => this.onDateString(`${month}/(${val},[-${day}])`) }
-                    >
-                        {DateEvent.days.map((val,ind) => { return (<MenuItem value={ind} key={"weekdaybefore" + ind.toString()} primaryText={val}/>)})}
-                    </DropDownMenu>
-                </div>
-            </div>
-        );
-    }
-
-
-    private getCustomSelector(dateString: string) {
-        return (
-            <div style={DateEvent.CELL_STYLE}>
-                <TextField
-                    hintText="Name" 
-                    value={dateString} 
-                    floatingLabelText="Custom Date"
-                    onChange={(e,d) => this.onDateString(d) }
-                />
-            </div>
-        );
-    }
+    let [dateType, setDateType] = useState(matchDate(props.model.dateString).dateType); 
 
 
 
-    let dateString = this.props.Model.dateString;
+    let dateString = props.model.dateString;
 
-    let matchRecord = DateEvent.matchDate(dateString);
+    let matchRecord = matchDate(dateString);
     
     let month = matchRecord.month ? matchRecord.month : 1;
     let day = matchRecord.day ? matchRecord.day : 1;
@@ -242,7 +255,7 @@ const DateEvent = (props: {
     let weekday = matchRecord.weekday ? matchRecord.weekday : 0;
 
     let DateSelector;
-    switch (state.dateType) {
+    switch (dateType) {
         case DateType.Date:
             DateSelector = getDateSelector(month, day);
             break;
@@ -279,11 +292,11 @@ const DateEvent = (props: {
 
     return (
         <div style={{padding: '10px', margin: '10px'}}>
-            <div style={DateEvent.CELL_STYLE}>
+            <div style={CELL_STYLE}>
                 <TextField 
                     hintText="Name" 
-                    value={this.props.Model.eventName} 
-                    onChange={(e,v) => {this.props.Model.eventName = v; this.props.onUpdate(); this.forceUpdate();}} 
+                    value={props.model.eventName} 
+                    onChange={(e,v) => {props.model.eventName = v; props.onUpdate(); forceUpdate();}} 
                     floatingLabelText="Event Name" 
                 />
             </div>
@@ -294,7 +307,7 @@ const DateEvent = (props: {
                 <SmallLabel Text="Date Type" />
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}}
-                    value={this.state.dateType} 
+                    value={state.dateType} 
                     onChange={dropdownChange}
                     autoWidth={true}
                 >
@@ -304,21 +317,21 @@ const DateEvent = (props: {
                     <MenuItem value={DateType.Custom}>Custom Moment-Holiday Text</MenuItem>
                 </Select>
             </div>
-            <div style={DateEvent.CELL_STYLE}>
+            <div style={CELL_STYLE}>
                 {DateSelector}
             </div>
-            <div style={DateEvent.CELL_STYLE}>
+            <div style={CELL_STYLE}>
                 <ImageLoader 
                     title="Choose Image..." 
-                    initialDataUrl={this.props.Model.imageDataUrl} 
-                    onDataUrl={(durl) => {this.props.Model.imageDataUrl = durl; this.props.onUpdate(); this.forceUpdate();}}
+                    initialDataUrl={props.model.imageDataUrl} 
+                    onDataUrl={(durl) => {props.model.imageDataUrl = durl; props.onUpdate(); forceUpdate();}}
                 />
             </div>
-            <div style={DateEvent.CELL_STYLE}>
+            <div style={CELL_STYLE}>
                 <IconButton
                     iconStyle={{width: 48, height: 48}}
                     style={{width: 96, height: 96, padding: 20}}
-                    onClick={() => this.props.onDelete()}
+                    onClick={() => props.onDelete()}
                 >
                     <ActionDelete />
                 </IconButton>

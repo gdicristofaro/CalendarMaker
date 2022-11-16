@@ -4,7 +4,6 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import ImageLoader from './ImageLoader';
 import Checkbox from '@mui/material/Checkbox';
-import PptxGen from '../PptxGen';
 import ColorPicker from './ColorPicker';
 import Paper from '@mui/material/Paper';
 import SmallLabel from './SmallLabel';
