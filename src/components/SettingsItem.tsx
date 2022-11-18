@@ -252,3 +252,5 @@ const AllFormatSettings = (props: {
         </div>
     );
 }
+
+export default AllFormatSettings;

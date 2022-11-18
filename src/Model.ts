@@ -1,5 +1,4 @@
-import PptxGen from './PptxGen';
-import * as $ from 'jquery';
+import * as PptxGen from './PptxGen';
 
 export class SettingsModel {
     Formatting: any;

@@ -3,8 +3,8 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import FlatButton from "@mui/material/Button"
 import RaisedButton from "@mui/material/Button"
-import {AllFormatSettings, AllFormatSettingsProps} from './SettingsItem';
-import {DateEvent, DateEventProps} from './DateEvent';
+import AllFormatSettings from './SettingsItem';
+import DateEvent from './DateEvent';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import ImageLoader from './ImageLoader';
@@ -13,6 +13,7 @@ import ParseHoliday from '../ParseHoliday';
 import * as download from 'downloadjs';
 import {DateEventModel, SettingsModel} from '../Model';
 import Dialog from '@mui/material/Dialog';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 var moment : any;
 
@@ -21,7 +22,7 @@ export interface MainComponentState {
     showResetDialog: boolean;
 }
 
-export class MainComponent extends React.Component<undefined, MainComponentState> {
+const MainComponent extends React.Component<undefined, MainComponentState> {
     constructor() {
         super();
 

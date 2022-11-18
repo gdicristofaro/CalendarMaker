@@ -287,7 +287,7 @@ const DateEvent = (props: {
 
         console.log(newDateString);
         onDateString(newDateString, false);
-        setState({dateType: val});
+        setDateType(val);
     };
 
     return (
@@ -296,18 +296,22 @@ const DateEvent = (props: {
                 <TextField 
                     hintText="Name" 
                     value={props.model.eventName} 
-                    onChange={(e,v) => {props.model.eventName = v; props.onUpdate(); forceUpdate();}} 
+                    onChange={(e,v) => {
+                        props.model.eventName = v; 
+                        props.onUpdate();
+                        forceUpdate();
+                    }} 
                     floatingLabelText="Event Name" 
                 />
             </div>
-            <div style={$.extend({}, DateEvent.CELL_STYLE, {
+            <div style={{...CELL_STYLE, ...{
                 width: '256px',
-                position: 'relative' })}
+                position: 'relative' }}}
             >
-                <SmallLabel Text="Date Type" />
+                <SmallLabel text="Date Type" />
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}}
-                    value={state.dateType} 
+                    value={dateType} 
                     onChange={dropdownChange}
                     autoWidth={true}
                 >
@@ -324,16 +328,20 @@ const DateEvent = (props: {
                 <ImageLoader 
                     title="Choose Image..." 
                     initialDataUrl={props.model.imageDataUrl} 
-                    onDataUrl={(durl) => {props.model.imageDataUrl = durl; props.onUpdate(); forceUpdate();}}
+                    onDataUrl={(durl) => {
+                        props.model.imageDataUrl = durl; 
+                        props.onUpdate(); 
+                        forceUpdate();
+                    }}
                 />
             </div>
             <div style={CELL_STYLE}>
                 <IconButton
-                    iconStyle={{width: 48, height: 48}}
-                    style={{width: 96, height: 96, padding: 20}}
+                    // iconStyle={{width: 48, height: 48}}
+                    // style={{width: 96, height: 96, padding: 20}}
                     onClick={() => props.onDelete()}
                 >
-                    <ActionDelete />
+                    <DeleteIcon />
                 </IconButton>
             </div>
         </div>
