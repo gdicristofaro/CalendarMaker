@@ -9,6 +9,7 @@
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.13",
     "@mui/x-date-pickers": "^5.0.8",
+    "dayjs": "^1.11.6",
     "downloadjs": "^1.4.7",
     "gh-pages": "^4.0.0",
     "ical": "^0.8.0",

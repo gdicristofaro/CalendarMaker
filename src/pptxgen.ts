@@ -1,6 +1,6 @@
 import * as $ from 'jquery';
 import moment from 'moment';
-import { parseNumYears } from './ParseNumYears';
+import { parseNumYears } from './parsenumyears';
 
 declare var PptxGenJS : any;
 
@@ -653,7 +653,7 @@ const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => 
     });
 }
 
-const create = async (settings: PptxSettings, events: DateEntry[], banners:string[], year: number) => {
+export const create = async (settings: PptxSettings, events: DateEntry[], banners:string[], year: number) => {
     let pptx = new PptxGenJS();
     pptx.setLayout('LAYOUT_4x3');
 

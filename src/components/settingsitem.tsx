@@ -2,11 +2,11 @@ import * as React from 'react';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-import ImageLoader from './ImageLoader';
+import ImageLoader from './imageloader';
 import Checkbox from '@mui/material/Checkbox';
-import ColorPicker from './ColorPicker';
+import ColorPicker from './colorpicker';
 import Paper from '@mui/material/Paper';
-import SmallLabel from './SmallLabel';
+import SmallLabel from './smalllabel';
 import { useState } from 'react';
 
 export enum VerticalAlign {

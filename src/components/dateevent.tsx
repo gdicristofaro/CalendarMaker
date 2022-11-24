@@ -2,15 +2,16 @@ import * as React from 'react';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-import ImageLoader from './ImageLoader';
+import ImageLoader from './imageloader';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import Paper from '@mui/material/Paper';
 import * as $ from 'jquery';
-import SmallLabel from './SmallLabel';
-import {DateEventModel} from '../Model';
+import SmallLabel from './smalllabel';
+import {DateEventModel} from '../model';
 import { useState } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
 
 export interface DateTypeInfo {
     dateType: DateType,
@@ -88,13 +89,13 @@ const matchDate = (dateString: string) : DateTypeInfo => {
  * when date string changes, should be called
  * @param newDateString the new date string
  */
-// const onDateString = (newDateString: string, forceUpdate: boolean = true) => {
-//     props.model.dateString = newDateString;
-//     props.onUpdate(); 
+const onDateString = (newDateString: string, forceUpdate: boolean = true) => {
+    props.model.dateString = newDateString;
+    props.onUpdate(); 
 
-//     if (forceUpdate)
-//         forceUpdate();
-// }
+    if (forceUpdate)
+        forceUpdate();
+}
 
 
 /**
@@ -106,12 +107,10 @@ const getDateSelector = (month: number, day: number) => {
     return (
         <div style={CELL_STYLE}>
             <DatePicker
-                floatingLabelText="Date for Event"
-                hintText="Select Date For Event"
-                disableYearSelection={true}
-                formatDate={(date:Date) => `${MONTHS[date.getMonth()]} ${date.getDate()}`}
-                onChange={(value: unknown, keyboardInputValue?: string) => onDateString(`${date.getMonth() + 1}/${date.getDate()}`) }
-                defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
+                label="Date for Event"
+                value={new Date(new Date().getFullYear(), month - 1, day)}
+                onChange={(value: Dayjs | null) => value && onDateString(`${value.month() + 1}/${value.date()}`) }
+                renderInput={(params) => <TextField {...params} />}
             />
         </div>
     );
@@ -132,7 +131,7 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={month} 
-                    onSelect={(evt) => onDateString(`${val}/(${dayOfWeek},${weekNumber})`)}
+                    onChange={(evt) => onDateString(`${evt.target.value}/(${dayOfWeek},${weekNumber})`)}
                 >
                     {MONTHS.map((val,ind) => { return (
                         <MenuItem key={"monthSelector" + ind.toString()} value={ind + 1}>
@@ -146,7 +145,7 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={dayOfWeek} 
-                    onSelect={(evt) => onDateString(`${month}/(${val},${weekNumber})`)}
+                    onChange={(evt) => onDateString(`${month}/(${evt.target.value},${weekNumber})`)}
                 >
                     {DAYS.map((val,ind) => { return (
                         <MenuItem key={"daySelector" + ind.toString()} value={ind}>
@@ -160,7 +159,7 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={ weekNumber } 
-                    onSelect={(evt) => onDateString(`${month}/(${dayOfWeek},${val})`)}
+                    onChange={(evt) => onDateString(`${month}/(${dayOfWeek},${evt.target.value})`)}
                 >
                     {WEEK_NUMBER.map((val,ind) => { return (
                         <MenuItem key={"weekNumSelector" + ind.toString()} value={ind+1}>
@@ -184,12 +183,10 @@ const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number)
         <div>
             <div style={CELL_STYLE}>
                 <DatePicker
-                    floatingLabelText="Pick Date for Event"
-                    hintText="Select Date For Event"
-                    disableYearSelection={true}
-                    formatDate={(date:Date) => `${MONTHS[date.getMonth()]} ${date.getDate()}`}
-                    onChange={(n, date:Date) => onDateString(`${date.getMonth() + 1}/(${dayOfWeek},[-${date.getDate()}])`) }
-                    defaultDate={new Date(new Date().getFullYear(), month - 1, day)}
+                    label="Select Date For Event"
+                    value={new Date(new Date().getFullYear(), month - 1, day)}
+                    onChange={(value: Dayjs | null) => value && onDateString(`${value.month() + 1}/(${dayOfWeek},[-${value.date()}])`) }
+                    renderInput={(params) => <TextField {...params} />}
                 />
             </div>
             <div style={CELL_STYLE}>
@@ -197,7 +194,7 @@ const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number)
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={dayOfWeek} 
-                    onChange={(e,i,val) => onDateString(`${month}/(${val},[-${day}])`) }
+                    onChange={(evt) => onDateString(`${month}/(${evt.target.value},[-${day}])`) }
                 >
                     {DAYS.map((val,ind) => { return (
                         <MenuItem value={ind} key={"weekdaybefore" + ind.toString()}>
@@ -215,10 +212,9 @@ const getCustomSelector = (dateString: string) => {
     return (
         <div style={CELL_STYLE}>
             <TextField
-                hintText="Name" 
                 value={dateString} 
-                floatingLabelText="Custom Date"
-                onChange={(evt) => onDateString(d) }
+                label="Custom Date"
+                onChange={(evt) => onDateString(evt.target.value) }
             />
         </div>
     );
@@ -270,26 +266,6 @@ const DateEvent = (props: {
             DateSelector = getCustomSelector(dateString);
     }
 
-    let dropdownChange = (e,i,val) => {
-        let newDateString;
-        switch (val) {
-            case DateType.WeekdayMonth:
-                newDateString = `${month}/(${weekday},${week})`;
-                break;
-            case DateType.WeekdayBefore:
-                newDateString = `${month}/(${weekday},[-${day}])`;
-                break;
-            case DateType.Custom:
-            case DateType.Date:
-                newDateString = `${month}/${day}`;
-                break;
-        };
-
-        console.log(newDateString);
-        onDateString(newDateString, false);
-        setDateType(val);
-    };
-
     return (
         <div style={{padding: '10px', margin: '10px'}}>
             <div style={CELL_STYLE}>
@@ -312,7 +288,26 @@ const DateEvent = (props: {
                 <Select 
                     style={{marginLeft: '-24px', marginTop: '-10px'}}
                     value={dateType} 
-                    onChange={dropdownChange}
+                    onChange={(evt) => {
+                        let val = evt.target.value;
+                        let newDateString: string = '';
+                        switch (val) {
+                            case DateType.WeekdayMonth:
+                                newDateString = `${month}/(${weekday},${week})`;
+                                break;
+                            case DateType.WeekdayBefore:
+                                newDateString = `${month}/(${weekday},[-${day}])`;
+                                break;
+                            case DateType.Custom:
+                            case DateType.Date:
+                                newDateString = `${month}/${day}`;
+                                break;
+                        };
+                
+                        console.log(newDateString);
+                        onDateString(newDateString, false);
+                        setDateType(val);
+                    }}
                     autoWidth={true}
                 >
                     <MenuItem value={DateType.Date}>Date</MenuItem>
