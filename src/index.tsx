@@ -8,18 +8,18 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { SettingsModel } from './model';
+import { ModelContextComponent } from './modelcontext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const ModelContext = React.createContext<undefined | SettingsModel>(undefined);
 
 root.render(
   <React.StrictMode>
-    <ModelContext.Provider value="dark">
+    <ModelContextComponent initialSettings={undefined}>
       <MainComponent />
-    </ModelContext.Provider>
+    </ModelContextComponent>
   </React.StrictMode>
 );
 

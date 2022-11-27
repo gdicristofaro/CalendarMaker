@@ -1,73 +1,10 @@
 import * as $ from 'jquery';
 import moment from 'moment';
+import { BorderOptions, DateEntry, Dimension, HeaderOptions, MiniCalOptions, PptxSettings } from './model';
 import { parseNumYears } from './parsenumyears';
 
 declare var PptxGenJS : any;
 
-// information pertaining to the date
-export class DateEntry {
-    public constructor(public month: number, public day: number, public name: string, public img: string) {}
-}
-
-class Dimension {
-    public constructor(public readonly X: number, public readonly Y: number, public readonly width: number, public readonly height: number) {}
-}
-
-
-export interface BorderOptions {
-    pt: string;
-    color: string;
-}
-
-export interface HeaderOptions {
-    valign: string;
-    align: string;
-    fill: string;
-    color: string;
-}
-
-export interface BodyOptions {
-    valign: string;
-    align: string;
-    font_size: number;
-    color: string;
-    fill: string;
-    italic: boolean;
-}
-
-export interface EmptyOptions {
-    fill: string;
-}
-
-export interface MiniCalOptions {
-    valign: string;
-    align: string;
-    color: string;
-    fill: string;
-    margin: number;
-}
-
-export interface TitleTextOptions {
-    color: string;
-    valign: string;
-}
-
-export interface EventTextOptions {
-    color: string;
-}
-
-export interface PptxSettings {
-    pptxName: string;
-    font: string;
-    calendarBorder: BorderOptions;
-    headerOptions: HeaderOptions;
-    bodyOptions: BodyOptions;
-    emptyOptions: EmptyOptions;
-    miniCalOptions: MiniCalOptions;
-    miniCalUnderlineColor: BorderOptions;
-    titleTextOptions: TitleTextOptions;
-    eventTextOptions: EventTextOptions;
-}
 
 
 const DAYS_OF_WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -126,7 +63,7 @@ const CAL_HEIGHTS = [
 const EVENT_HEIGHTS = CAL_HEIGHTS.slice(1);
 
 // default settings for calendar
-export const DefaultSettings = {
+export const DefaultFormattingSettings: PptxSettings = {
     pptxName: 'Calendar',
     font: 'Arial', // be careful modifying this as it will impact metrics for determining widths/heights
     calendarBorder: {pt: '1', color: '000000'},
@@ -286,7 +223,7 @@ const coalesceWords = (words: string[], leadingSpace: boolean) => {
 
 // pushes the new line if necessary and searches for number + nd|rd|th for superscript
 const formattedString = (str: string, appendLineBreak: boolean) => {
-    var retArr = [];
+    var retArr: any[] = [];
 
     // split on each word
     var splitArr = str.split(" ");
@@ -344,7 +281,7 @@ const getEventMetrics = (events: DateEntry[]) => {
     // get number of lines text will be and the object representing text to be added
     return events.reduce((prevMetric, curEv, index) => {
         // TODO this could be changed to better calculate total lines, but this should be fairly accurate
-        let lines = prevMetric.lines + Math.ceil(curEv.name.length / CHARACTERS_PER_LINE);
+        let lines: number = prevMetric.lines + Math.ceil(curEv.name.length / CHARACTERS_PER_LINE);
         let items = formattedString(curEv.name, index < events.length - 1);
 
         for (var textItem of items)
@@ -363,7 +300,7 @@ const getEventMetrics = (events: DateEntry[]) => {
  */
 const addEventImages = async (slide: any, imgs:string[], imgPlacement:Dimension) => {
     // the location where the text will end; set half way in middle of the cell (and if images are added adjust up)
-    let textBottom = imgPlacement.Y + imgPlacement.height / 2;
+    let textBottom = imgPlacement.y + imgPlacement.height / 2;
 
     if (imgs && imgs.length > 0) {
         // image width will be alotted width divided by number of images and alotting for spacing between images
@@ -374,9 +311,13 @@ const addEventImages = async (slide: any, imgs:string[], imgPlacement:Dimension)
             let val = imgs[ind];
 
             // determine bounds for image within calendar event bounds
-            let imgBounds = new Dimension(imgPlacement.X + imgWidth * ind + (EVENT_IMAGE_SPACING * Math.max(0, ind - 1)),
-                imgPlacement.Y,imgWidth,imgPlacement.height);
-
+            let imgBounds = {
+                x: imgPlacement.x + imgWidth * ind + (EVENT_IMAGE_SPACING * Math.max(0, ind - 1)),
+                y: imgPlacement.y,
+                width: imgWidth,
+                height: imgPlacement.height
+            };
+            
             // maximize space while maintaining image proportions
             let img = await getImage(val);
             let resWidth, resHeight;
@@ -389,8 +330,8 @@ const addEventImages = async (slide: any, imgs:string[], imgPlacement:Dimension)
                 resWidth = img.width * resHeight / img.height;
             }
 
-            let imgx = (imgBounds.width - resWidth) / 2 + imgBounds.X;
-            let imgy = (imgBounds.height - resHeight) / 2 + imgBounds.Y;
+            let imgx = (imgBounds.width - resWidth) / 2 + imgBounds.x;
+            let imgy = (imgBounds.height - resHeight) / 2 + imgBounds.y;
             textBottom = Math.min(textBottom, imgy);
 
             if (img)
@@ -426,12 +367,12 @@ const addEvents = async (slide: any, eventOptions: any, events: DateEntry[], pla
     }, strArr);
 
     // max width will be alotted divided by number of images (accounting for spacing)
-    let imgYStart = placement.Y + placement.height - availImgHeight;
+    let imgYStart = placement.y + placement.height - availImgHeight;
 
-    let textBottom = await addEventImages(slide, imgs, new Dimension(placement.X, imgYStart, placement.width, availImgHeight));
+    let textBottom = await addEventImages(slide, imgs, { x: placement.x, y: imgYStart, width: placement.width, height: availImgHeight });
 
     // place text right above highest image
-    slide.addText(metrics.text, $.extend(true, { x:placement.X, y:placement.Y, w:placement.width, h:textBottom - placement.Y }, eventOptions));
+    slide.addText(metrics.text, $.extend(true, { x: placement.x, y:placement.y, w:placement.width, h:textBottom - placement.y }, eventOptions));
 }
 
 // gives dimensions that maintain aspect ratio but bounds to maxWidth, maxHeight
@@ -622,11 +563,12 @@ const generateCalendar = async (slide: any, settings: PptxSettings, month: numbe
         for (var r = 0; r<row; r++)
             thisYPlacement += EVENT_HEIGHTS[r];
 
-        var dim = new Dimension(
-            xEventStart + col * eventWidth + eventWidth * EVENT_CAL_PADDING_PROP, 
-            thisYPlacement + EVENT_CAL_TOP_PADDING, 
-            Math.max(0, eventWidth * (1 - EVENT_CAL_PADDING_PROP * 2)), 
-            Math.max(0, EVENT_HEIGHTS[row] - EVENT_CAL_TOP_PADDING - eventWidth * EVENT_CAL_PADDING_PROP));
+        var dim = {
+            x: xEventStart + col * eventWidth + eventWidth * EVENT_CAL_PADDING_PROP, 
+            y: thisYPlacement + EVENT_CAL_TOP_PADDING, 
+            width: Math.max(0, eventWidth * (1 - EVENT_CAL_PADDING_PROP * 2)), 
+            height: Math.max(0, EVENT_HEIGHTS[row] - EVENT_CAL_TOP_PADDING - eventWidth * EVENT_CAL_PADDING_PROP)
+        };
 
         // add events with image
         await addEvents(slide, options.eventTextOptions, dates[dt], dim);
@@ -649,7 +591,12 @@ const generateCalendar = async (slide: any, settings: PptxSettings, month: numbe
 const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => {
     return events.map((dateEntry) => {
         let newString = parseNumYears(dateEntry.name, year);
-        return new DateEntry(dateEntry.month, dateEntry.day, newString, dateEntry.img);
+        return {
+            month: dateEntry.month, 
+            day: dateEntry.day, 
+            name: newString, 
+            img: dateEntry.img
+        };
     });
 }
 

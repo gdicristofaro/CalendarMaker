@@ -6,8 +6,6 @@ import ImageLoader from './imageloader';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import Paper from '@mui/material/Paper';
-import * as $ from 'jquery';
 import SmallLabel from './smalllabel';
 import {DateEventModel} from '../model';
 import { useState } from 'react';
@@ -270,14 +268,15 @@ const DateEvent = (props: {
         <div style={{padding: '10px', margin: '10px'}}>
             <div style={CELL_STYLE}>
                 <TextField 
-                    hintText="Name" 
+                    // hintText="Name" 
                     value={props.model.eventName} 
-                    onChange={(e,v) => {
-                        props.model.eventName = v; 
+                    onChange={(evt) => {
+                        let value = evt.target.textContent;
+                        props.model.eventName = value; 
                         props.onUpdate();
                         forceUpdate();
                     }} 
-                    floatingLabelText="Event Name" 
+                    title="Event Name" 
                 />
             </div>
             <div style={{...CELL_STYLE, ...{

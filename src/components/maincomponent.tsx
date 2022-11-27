@@ -19,7 +19,7 @@ import useLocalStorage from '../utils/localstoragehook';
 
 
 const MainComponent = (props: {
-    settings: SettingsModel,
+    // settings: SettingsModel,
     showResetDialog: boolean
 }) => {
 
