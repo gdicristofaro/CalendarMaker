@@ -7,14 +7,13 @@ import DateEvent from './dateevent';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import ImageLoader from './imageloader';
-import { DateEntry, create as pptxCreate } from '../pptxgen'
+import { create as pptxCreate } from '../pptxgen'
 import { } from '../parseholiday';
 import * as download from 'downloadjs';
 import {DateEventModel, SettingsModel} from '../model';
 import Dialog from '@mui/material/Dialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import React from 'react';
-import useLocalStorage from '../utils/localstoragehook';
 
 
 

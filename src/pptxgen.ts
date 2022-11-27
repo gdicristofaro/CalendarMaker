@@ -1,16 +1,14 @@
-import * as $ from 'jquery';
 import moment from 'moment';
-import { BorderOptions, DateEntry, Dimension, HeaderOptions, MiniCalOptions, PptxSettings } from './model';
+import { BorderOptions, DateEntry, Dimension, HeaderOptions, CalOptions, PptxSettings, EventTextOptions } from './model';
 import { parseNumYears } from './parsenumyears';
 
-declare var PptxGenJS : any;
-
-
+declare let PptxGenJS : any;
 
 const DAYS_OF_WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 const PAGE_WIDTH = 10;
 const PAGE_HEIGHT = 7.5;
+
 
 // defines placement for header image
 const HEADER_IMG_Y = .1;
@@ -60,68 +58,17 @@ const CAL_HEIGHTS = [
     SIXTH_CELL_HEIGHT
 ];
 
+const INCHES_TO_POINT = .0138889;
+
 const EVENT_HEIGHTS = CAL_HEIGHTS.slice(1);
 
-// default settings for calendar
-export const DefaultFormattingSettings: PptxSettings = {
-    pptxName: 'Calendar',
-    font: 'Arial', // be careful modifying this as it will impact metrics for determining widths/heights
-    calendarBorder: {pt: '1', color: '000000'},
-    // saturday, sunday, etc. in main cal
-    headerOptions:{
-        valign: 'middle',
-        align: 'center',
-        fill:'000055',
-        color:'FFFFFF'
-    },
-    // options for body calendar cells and date number present
-    bodyOptions: {
-        valign:'top',
-        align:'left', 
-        font_size:14, 
-        color: '880000', 
-        fill: 'FFFFFF', 
-        italic: true
-    },
-    emptyOptions: {
-        fill: 'FFFFE0'
-    },
-    miniCalOptions: {
-        valign:'top',
-        align:'center', 
-        color: '880000', 
-        fill: 'FFFFE0', 
-        margin:0
-    },
-    miniCalUnderlineColor: {
-        pt: '1',
-        color: '880000'
-    },
-    // i.e. January
-    titleTextOptions: {
-        color:'000055', 
-        valign: 'middle'
-    },
-    eventTextOptions: {
-        color:'880000'
-    }
-};
 
-// creates options to be used with PptxGenJS from settings
-// some further modifications that ar situationally dependent will still need to occur (i.e. border based on which end cell is on)
-const generateOptions = (settings: PptxSettings): PptxSettings =>  {
-    let toRet : any = {};
-
-    toRet.headerOpts = $.extend(true, {font_size:HEADER_FONT_SIZE, font_face:settings.font}, settings.headerOptions);
-    toRet.bodyOpts = $.extend(true, {font_face:settings.font, border: settings.calendarBorder}, settings.bodyOptions);
-    toRet.emptyOpts = settings.emptyOptions;
-    toRet.miniCalOpts = $.extend(true, {margin:0, font_size:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}, settings.miniCalOptions);
-    toRet.miniCalHeaderOpts = $.extend(true, {}, toRet.miniCalOpts, {border: [NO_BORDER, NO_BORDER, settings.miniCalUnderlineColor, NO_BORDER]});
-    toRet.titleTextOpts = $.extend({font_face:settings.font, align: 'left', font_size:TITLE_TEXT_SIZE}, settings.titleTextOptions)
-    toRet.eventOpts = $.extend({font_size:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'c'}, settings.eventTextOptions);
-    return toRet as PptxSettings;
-}
-
+/**
+ * Generates options and layout for each cell in headers.
+ * @param headerOpts Options for header.
+ * @param calendarBorder Options for the border.
+ * @returns PptxGen layout array.
+ */
 const getHeaderArr = (headerOpts: HeaderOptions, calendarBorder: BorderOptions) => {
 
     return DAYS_OF_WEEK.map((day, index, arr) => { 
@@ -131,11 +78,11 @@ const getHeaderArr = (headerOpts: HeaderOptions, calendarBorder: BorderOptions) 
             calendarBorder,
             index == 0 ? calendarBorder : NO_BORDER
         ]
-        return { text: day, options: $.extend(false, {border: border}, headerOpts)}; 
+        return { text: day, options: {...{border: border}, ...headerOpts}}; 
     });
 }
 
-const getMiniHeaderArr = (miniCalHeaderOpts: MiniCalOptions) => {
+const getMiniHeaderArr = (miniCalHeaderOpts: CalOptions) => {
     return DAYS_OF_WEEK.map(day => { return { text: day.substring(0,1), options: miniCalHeaderOpts} });
 }
 
@@ -144,7 +91,7 @@ const getMiniHeaderArr = (miniCalHeaderOpts: MiniCalOptions) => {
  * generates array to be utilized with addTable
  * @param month zero-indexed month
  * @param year the year
- * @param miniCalOpts regular options (for normal date cells)
+ * @param calOpts regular options (for normal date cells)
  * @param emptyopts for cells with no date
  * @param emptyborder the border to use with cells that are "merged"
  * @param defaultborder normal border to use
@@ -154,19 +101,19 @@ const getMiniHeaderArr = (miniCalHeaderOpts: MiniCalOptions) => {
  *   bottomRightCells - same for bottom right
  *   rows - rows to be used with addTable
  */
-const generateDaysTable = (month: number, year: number, miniCalOpts: MiniCalOptions, emptyopts: MiniCalOptions, emptyborder: BorderOptions, defaultborder: BorderOptions) => {
-    var date = moment(new Date(year, month, 1));
+const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts: any, emptyborder: BorderOptions, defaultborder: BorderOptions) => {
+    let date = moment(new Date(year, month, 1));
 
-    var monthDays = date.daysInMonth();
+    let monthDays = date.daysInMonth();
 
-    var arr = [];
+    let arr = [];
 
     // add extra days until we get to start day for month
-    var startDay = date.day();
-    for (var i = 0; i < startDay; i++) {
-        var leftBorder = (i == 0) ? defaultborder : emptyborder;
-        var rightBorder = (i == startDay - 1) ? defaultborder : emptyborder;
-        var theseEmptyOpts = $.extend(false, {border: [defaultborder, rightBorder, defaultborder, leftBorder]}, emptyopts);
+    let startDay = date.day();
+    for (let i = 0; i < startDay; i++) {
+        let leftBorder = (i == 0) ? defaultborder : emptyborder;
+        let rightBorder = (i == startDay - 1) ? defaultborder : emptyborder;
+        let theseEmptyOpts = {...{border: [defaultborder, rightBorder, defaultborder, leftBorder]}, ...emptyopts};
         arr.push({text: '', options: theseEmptyOpts});
     }
 
@@ -174,23 +121,25 @@ const generateDaysTable = (month: number, year: number, miniCalOpts: MiniCalOpti
     let topLeftCells = arr.length;
 
     // add items until we get through month
-    for (var i = 1; i <= monthDays; i++)
-        arr.push({text: i.toString(), options: miniCalOpts});
+    let curArrDay = 1;
+    for (; curArrDay <= monthDays; curArrDay++) {
+        arr.push({text: curArrDay.toString(), options: calOpts});
+    }
 
-    var bottomRightCells = 0;
+    let bottomRightCells = 0;
 
     // get to the end of the week
     while (arr.length % 7 != 0) {
-        var leftBorder = (i == 0) ? defaultborder : emptyborder;
-        var rightBorder = (arr.length % 7 == 6) ? defaultborder : emptyborder;
-        var theseEmptyOpts = $.extend(false, {border: [defaultborder, rightBorder, defaultborder, leftBorder]}, emptyopts);
+        let leftBorder = (curArrDay == 0) ? defaultborder : emptyborder;
+        let rightBorder : BorderOptions = (arr.length % 7 == 6) ? defaultborder : emptyborder;
+        let theseEmptyOpts = {...{border: [defaultborder, rightBorder, defaultborder, leftBorder]}, ...emptyopts};
         arr.push({text: '', options: theseEmptyOpts});
         bottomRightCells++;
     }
 
-    var retRes = [];
-    for (var i = 0; i < arr.length / 7; i++) {
-        var portion = arr.slice(i * 7, (i + 1) * 7);
+    let retRes = [];
+    for (let weekIdx = 0; weekIdx < arr.length / 7; weekIdx++) {
+        let portion = arr.slice(weekIdx * 7, (weekIdx + 1) * 7);
         retRes.push(portion);
     }
 
@@ -203,7 +152,11 @@ const generateDaysTable = (month: number, year: number, miniCalOpts: MiniCalOpti
 }
 
 
-// gets image from url (path/dataurl)
+/**
+ * Resolves an image given a data url.
+ * @param url The data url.
+ * @returns The html img element.
+ */
 const getImage = async (url: string) : Promise<HTMLImageElement> => {
     return new Promise<HTMLImageElement>((resolve, reject) => {
         let img = new Image();
@@ -212,33 +165,45 @@ const getImage = async (url: string) : Promise<HTMLImageElement> => {
     });
 }
 
-// helper function for formatted string
+
+/**
+ * Returns a pptxgen word list object.
+ * @param words The words to coalesce. 
+ * @param leadingSpace True to add a leading space.
+ * @returns The pptxgen object.
+ */
 const coalesceWords = (words: string[], leadingSpace: boolean) => {
-    var retWords = words.join(" ");
+    let retWords = words.join(" ");
     if (leadingSpace)
         retWords = " " + retWords;
 
     return { text: retWords, options: {breakLine: false}};
 }
 
-// pushes the new line if necessary and searches for number + nd|rd|th for superscript
+
+/**
+ * Creates a pptxgen string object of the text.
+ * @param str The string to format.
+ * @param appendLineBreak True to append a line break.
+ * @returns The formatted string object.
+ */
 const formattedString = (str: string, appendLineBreak: boolean) => {
-    var retArr: any[] = [];
+    let retArr: any[] = [];
 
     // split on each word
-    var splitArr = str.split(" ");
+    let splitArr = str.split(" ");
 
     // holds all the word items until we hit a superscript item (at which point, push to retArr)
-    var normalWordBuffer = [];
-    var afterSuperScript = false;
+    let normalWordBuffer = [];
+    let afterSuperScript = false;
 
-    for (var word of splitArr) {
+    for (let word of splitArr) {
         if (word.match("\\d+(?=st|nd|rd|th)")) {
             // push the first part (normal text) to normal word buffer
             normalWordBuffer.push(word.substring(0, word.length - 2));
 
             // coalesce all previous normal text and push to return array
-            var coalesced = coalesceWords(normalWordBuffer, afterSuperScript);
+            let coalesced = coalesceWords(normalWordBuffer, afterSuperScript);
             retArr.push(coalesced);
 
             // clear out normal word buffer
@@ -255,7 +220,7 @@ const formattedString = (str: string, appendLineBreak: boolean) => {
 
     // flush normal word buffer as before
     if (normalWordBuffer.length > 0) {
-        var coalesced = coalesceWords(normalWordBuffer, afterSuperScript);
+        let coalesced = coalesceWords(normalWordBuffer, afterSuperScript);
         retArr.push(coalesced);
     }
 
@@ -272,10 +237,15 @@ const formattedString = (str: string, appendLineBreak: boolean) => {
     return retArr;
 }
 
-// get metrics for events to be added to a particular date
+
+/**
+ * Metrics regarding text for given events.
+ * @param events The events.
+ * @returns 
+ *      lines: number of lines
+ *      text: the text
+ */
 const getEventMetrics = (events: DateEntry[]) => {
-
-
     let orig : {lines: number, text: any[]} = {lines: 0, text:[]};
 
     // get number of lines text will be and the object representing text to be added
@@ -284,7 +254,7 @@ const getEventMetrics = (events: DateEntry[]) => {
         let lines: number = prevMetric.lines + Math.ceil(curEv.name.length / CHARACTERS_PER_LINE);
         let items = formattedString(curEv.name, index < events.length - 1);
 
-        for (var textItem of items)
+        for (let textItem of items)
             prevMetric.text.push(textItem);
 
         return {lines: lines, text: prevMetric.text};
@@ -343,13 +313,19 @@ const addEventImages = async (slide: any, imgs:string[], imgPlacement:Dimension)
 }
 
 
-// adds events to a particular cell in the calendar
-const addEvents = async (slide: any, eventOptions: any, events: DateEntry[], placement: Dimension) => {
+/**
+ * Adds events to a pptxgen slide.
+ * @param slide The pptxgen slide.
+ * @param eventOptions The options for the events.
+ * @param events The events.
+ * @param placement The dimension placement.
+ */
+const addEvents = async (slide: any, eventOptions: EventTextOptions, events: DateEntry[], placement: Dimension) => {
     let metrics = getEventMetrics(events);
 
     // how tall the text will be in pixels
     // constant taken from conversion from points to inches
-    let textPixelSize = EVENT_FONT_SIZE * .0138889;
+    let textPixelSize = EVENT_FONT_SIZE * INCHES_TO_POINT;
 
     // determine height dedicated to text
     // images will take at least half of height
@@ -372,18 +348,26 @@ const addEvents = async (slide: any, eventOptions: any, events: DateEntry[], pla
     let textBottom = await addEventImages(slide, imgs, { x: placement.x, y: imgYStart, width: placement.width, height: availImgHeight });
 
     // place text right above highest image
-    slide.addText(metrics.text, $.extend(true, { x: placement.x, y:placement.y, w:placement.width, h:textBottom - placement.y }, eventOptions));
+    slide.addText(metrics.text, {...{ x: placement.x, y:placement.y, w:placement.width, h:textBottom - placement.y }, ...eventOptions});
 }
 
 // gives dimensions that maintain aspect ratio but bounds to maxWidth, maxHeight
+/**
+ * Gives dimensions that maintain aspect ratio but bounds to maxWidth, maxHeight.
+ * @param origWidth The original width.
+ * @param origHeight The original height.
+ * @param maxWidth The maximum bounding width.
+ * @param maxHeight The maximum bounding heght.
+ * @returns The width and height to use.
+ */
 const sizeToBoundingBox = (origWidth: number, origHeight: number, maxWidth: number, maxHeight: number) => {
-    var origWH = origWidth / origHeight;
-    var maxWH = maxWidth / maxHeight;
+    let origWH = origWidth / origHeight;
+    let maxWH = maxWidth / maxHeight;
 
     // if original width in proportion to height is greater than max width/height, then width will be maximum dimension
 
     // oW / oH = rW / rH
-    var w,h;
+    let w,h;
     // rH = rW * oH / oW
     if (origWH > maxWH) {
         w = maxWidth;
@@ -408,7 +392,7 @@ const sizeToBoundingBox = (origWidth: number, origHeight: number, maxWidth: numb
  * @param x starting x position
  * @param y starting y position
  */
-const addMiniCalendar = (slide: any, miniCalOpts: MiniCalOptions, miniCalHeaderOpts: MiniCalOptions, month:number, year:number, x:number, y:number) => {
+const addMiniCalendar = (slide: any, miniCalOpts: CalOptions, miniCalHeaderOpts: CalOptions, month:number, year:number, x:number, y:number) => {
     let prevMonthCal = generateDaysTable(month,year,miniCalOpts,miniCalOpts,NO_BORDER,NO_BORDER).rows;
     prevMonthCal.unshift(getMiniHeaderArr(miniCalHeaderOpts));
 
@@ -422,7 +406,7 @@ const addMiniCalendar = (slide: any, miniCalOpts: MiniCalOptions, miniCalHeaderO
     const tableOptions = { x:x, y:y, w:MINI_WIDTH, rowH:MINI_HEIGHT/8, fill:'FFFFE0'};
 
     slide.addTable(prevMonthCal, tableOptions);
-    slide.addText(prevMonthString, $.extend({ x:x, y:y, w:MINI_WIDTH, h:MINI_HEIGHT/8}, miniCalOpts));
+    slide.addText(prevMonthString, {...{ x:x, y:y, w:MINI_WIDTH, h:MINI_HEIGHT/8}, ...miniCalOpts});
 }
 
 /**
@@ -437,7 +421,7 @@ const addMiniCalendar = (slide: any, miniCalOpts: MiniCalOptions, miniCalHeaderO
  * @param month the zero-indexed month
  * @param year the year 
  */
-const generateMiniCalendars = (slide: any, miniCalOpts: MiniCalOptions, miniCalHeaderOpts: MiniCalOptions, 
+const generateMiniCalendars = (slide: any, miniCalOpts: CalOptions, miniCalHeaderOpts: CalOptions, 
     x: number, rowNumber : number, topLeftCells : number, bottomRightCells : number, month: number, year: number) => {
 
     let prevX;
@@ -479,7 +463,7 @@ const generateMiniCalendars = (slide: any, miniCalOpts: MiniCalOptions, miniCalH
         let topAvail = topLeftCells * CAL_CELL_WIDTH;
         prevX = x + (topAvail - MINI_WIDTH) / 2;
 
-        var botAvail = bottomRightCells * CAL_CELL_WIDTH;
+        let botAvail = bottomRightCells * CAL_CELL_WIDTH;
         nextX = x + (7 - bottomRightCells) * CAL_CELL_WIDTH + (botAvail - MINI_WIDTH) / 2;
     }
 
@@ -504,66 +488,80 @@ const generateMiniCalendars = (slide: any, miniCalOpts: MiniCalOptions, miniCalH
 }
 
 
+/**
+ * Adds a banner to a slide.
+ * @param slide The slide.
+ * @param imagepath The image data url
+ */
 const addBanner = async (slide: any, imagepath: string | undefined) => {
     if (!imagepath || imagepath.length < 1)
         return;
 
-    var img = await getImage(imagepath);
+    let img = await getImage(imagepath);
     
-    var imgDim = sizeToBoundingBox(img.width, img.height, HEADER_IMG_WIDTH, HEADER_IMG_HEIGHT);
-    var imgx = (PAGE_WIDTH - imgDim.width) / 2;
-    var imgy = HEADER_IMG_Y + (HEADER_IMG_HEIGHT - imgDim.height) / 2;
+    let imgDim = sizeToBoundingBox(img.width, img.height, HEADER_IMG_WIDTH, HEADER_IMG_HEIGHT);
+    let imgx = (PAGE_WIDTH - imgDim.width) / 2;
+    let imgy = HEADER_IMG_Y + (HEADER_IMG_HEIGHT - imgDim.height) / 2;
 
     if (img)
         slide.addImage({ data:img.src, x:imgx, y:imgy, w:imgDim.width, h:imgDim.height, align: 'center', valign: 'top' });
 }
 
 
-const generateCalendar = async (slide: any, settings: PptxSettings, month: number, year: number, imagepath: string | undefined, dates: {[day: number] : DateEntry[]}) => {
-    let options = generateOptions(settings);
+/**
+ * Generates the monthly calendar for one slide.
+ * @param slide The slide.
+ * @param options The settings.
+ * @param month The month.
+ * @param year The year.
+ * @param imagepath The banner data url.
+ * @param dates object mapping the day to the date entry for a holiday.
+ */
+const generateMonthCalendar = async (slide: any, options: PptxSettings, month: number, year: number, imagepath: string | undefined, dates: {[day: number] : DateEntry[]}) => {
 
-    var date = moment(new Date(year, month, 1));
+    let date = moment(new Date(year, month, 1));
 
     // get month string like January 2018
-    var monthStr = date.format("MMMM") + " " + date.format("YYYY");
+    let monthStr = date.format("MMMM") + " " + date.format("YYYY");
 
     await addBanner(slide, imagepath);
     
-    var width = CAL_CELL_WIDTH * 7;
-    var x = (PAGE_WIDTH - width ) / 2;
+    let width = CAL_CELL_WIDTH * 7;
+    let x = (PAGE_WIDTH - width ) / 2;
 
-    slide.addText(monthStr, $.extend({ x:CAL_TEXT_X, y:CAL_TEXT_Y, h:CAL_TEXT_H}, options.titleTextOptions));
+    slide.addText(monthStr, {...{ x:CAL_TEXT_X, y:CAL_TEXT_Y, h:CAL_TEXT_H}, ...options.titleTextOptions});
 
-    var tabOpts = { x:x, y:CAL_Y, w:width, rowH: CAL_HEIGHTS };
+    let tabOpts = { x:x, y:CAL_Y, w:width, rowH: CAL_HEIGHTS };
 
     // generate primary table
-    var rowData = generateDaysTable(month,year,options.bodyOptions,options.emptyOptions,NO_BORDER, settings.calendarBorder);
-    var rows = rowData.rows;
-    rows.unshift(getHeaderArr(options.headerOpts, settings.calendarBorder));
+    let rowData = generateDaysTable(month,year,options.bodyOptions,options.emptyOptions,NO_BORDER, options.calendarBorder);
+    let rows: any[] = rowData.rows;
+    let headerArr = getHeaderArr(options.headerOptions, options.calendarBorder);
+    rows.unshift(headerArr);
 
     slide.addTable(rows, tabOpts);
 
-
-    generateMiniCalendars(slide, options.miniCalOptions, options.miniCalHeaderOptions, 
+    let miniCalHeaderOpts = {...options.miniCalOptions, ...{border: [NO_BORDER, NO_BORDER, options.miniCalUnderlineColor, NO_BORDER]}};
+    generateMiniCalendars(slide, options.miniCalOptions, miniCalHeaderOpts, 
         x, rowData.rowNumber, rowData.topLeftCells, rowData.bottomRightCells, month, year);
 
     // info for creating events
-    var xEventStart = x;
-    var yEventStart = CAL_Y + CAL_HEADER_HEIGHT;
-    var eventWidth = CAL_CELL_WIDTH;
+    let xEventStart = x;
+    let yEventStart = CAL_Y + CAL_HEADER_HEIGHT;
+    let eventWidth = CAL_CELL_WIDTH;
 
 
-    for (var dt in dates) {
-        var dayNum = rowData.topLeftCells + parseInt(dt, 10);
+    for (let dt in dates) {
+        let dayNum = rowData.topLeftCells + parseInt(dt, 10);
 
-        var row = Math.floor((dayNum - 1) / 7);
-        var col = (dayNum - 1) % 7;
+        let row = Math.floor((dayNum - 1) / 7);
+        let col = (dayNum - 1) % 7;
 
-        var thisYPlacement = yEventStart;
-        for (var r = 0; r<row; r++)
+        let thisYPlacement = yEventStart;
+        for (let r = 0; r<row; r++)
             thisYPlacement += EVENT_HEIGHTS[r];
 
-        var dim = {
+        let dim = {
             x: xEventStart + col * eventWidth + eventWidth * EVENT_CAL_PADDING_PROP, 
             y: thisYPlacement + EVENT_CAL_TOP_PADDING, 
             width: Math.max(0, eventWidth * (1 - EVENT_CAL_PADDING_PROP * 2)), 
@@ -575,19 +573,29 @@ const generateCalendar = async (slide: any, settings: PptxSettings, month: numbe
     }
 }
 
+// TODO remove
+// creates options to be used with PptxGenJS from settings
+// some further modifications that ar situationally dependent will still need to occur (i.e. border based on which end cell is on)
+// const generateOptions = (settings: PptxSettings): PptxSettings =>  {
+//     let toRet : any = {};
 
-// private Settings;
-// private Events: DateEntry[];
-// private Year: number;
-// private Banners: string[];  // dataurls 0-indexed by month
-
-// constructor(settings, events: DateEntry[], banners:string[], year: number) {
-//     this.Settings = $.extend(true, {}, DefaultSettings, settings);
-//     this.Events = convertDateEntries(events, year);
-//     this.Year = year;
-//     this.Banners = banners;
+//     toRet.headerOpts = $.extend(true, {font_size:HEADER_FONT_SIZE, font_face:settings.font}, settings.headerOptions);
+//     toRet.bodyOpts = $.extend(true, {font_face:settings.font, border: settings.calendarBorder}, settings.bodyOptions);
+//     toRet.emptyOpts = settings.emptyOptions;
+//     toRet.miniCalOpts = $.extend(true, {margin:0, font_size:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}, settings.miniCalOptions);
+//     
+//     toRet.titleTextOpts = $.extend({font_face:settings.font, align: 'left', font_size:TITLE_TEXT_SIZE}, settings.titleTextOptions)
+//     toRet.eventOpts = $.extend({font_size:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'c'}, settings.eventTextOptions);
+//     return toRet as PptxSettings;
 // }
 
+
+/**
+ * Converts date entries from previous year to current year.
+ * @param events The events.
+ * @param year The year.
+ * @returns The entries with the modified dates.
+ */
 const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => {
     return events.map((dateEntry) => {
         let newString = parseNumYears(dateEntry.name, year);
@@ -600,13 +608,20 @@ const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => 
     });
 }
 
+/**
+ * Creates a powerpoint file for the calendar.
+ * @param settings The powerpoint settings.
+ * @param events The events.
+ * @param banners The banner data urls for each month.
+ * @param year The year.
+ */
 export const create = async (settings: PptxSettings, events: DateEntry[], banners:string[], year: number) => {
     let pptx = new PptxGenJS();
     pptx.setLayout('LAYOUT_4x3');
 
     let dates : {[day: number] : DateEntry[]}[] = [];
 
-    for (var i = 0; i < 12; i++)
+    for (let i = 0; i < 12; i++)
         dates.push({});
 
     for (let ev of events) {
@@ -624,10 +639,10 @@ export const create = async (settings: PptxSettings, events: DateEntry[], banner
         monthItems[thisDate.getDate()].push(ev);
     }
 
-    for (var i = 0; i < 12; i++) {
+    for (let i = 0; i < 12; i++) {
         let slide = pptx.addNewSlide();
         let bannerToUse = (banners && banners.length > i) ? banners[i] : undefined;
-        await generateCalendar(slide, settings, i, year, bannerToUse, dates[i]);
+        await generateMonthCalendar(slide, settings, i, year, bannerToUse, dates[i]);
     }
 
     pptx.save(settings.pptxName + '-' + year.toString()); 

@@ -1,5 +1,3 @@
-import { DefaultFormattingSettings } from "./pptxgen";
-
 export interface SettingsModel {
     formatting: PptxSettings;
     events: DateEventModel[];
@@ -10,18 +8,6 @@ export interface SettingsModel {
     };
     year: number;
 }
-
-export const DefaultSettings: SettingsModel = {
-    formatting: DefaultFormattingSettings,
-    events: [],
-    banners: {
-        January: '', February: '', March: '', April: '', May: '', June: '',
-        July: '', August: '', September: '', October: '', November: '', December: ''
-    },
-    // get next year
-    year: new Date().getFullYear() + 1
-}
-
 
 export interface DateEventModel {
     eventName: string;
@@ -71,7 +57,7 @@ export interface EmptyOptions {
     fill: string;
 }
 
-export interface MiniCalOptions {
+export interface CalOptions {
     valign: string;
     align: string;
     color: string;
@@ -95,10 +81,69 @@ export interface PptxSettings {
     headerOptions: HeaderOptions;
     bodyOptions: BodyOptions;
     emptyOptions: EmptyOptions;
-    miniCalOptions: MiniCalOptions;
+    miniCalOptions: CalOptions;
     miniCalUnderlineColor: BorderOptions;
     titleTextOptions: TitleTextOptions;
     eventTextOptions: EventTextOptions;
+}
+
+
+
+// default settings for calendar
+export const DefaultFormattingSettings: PptxSettings = {
+    pptxName: 'Calendar',
+    font: 'Arial', // be careful modifying this as it will impact metrics for determining widths/heights
+    calendarBorder: {pt: '1', color: '000000'},
+    // saturday, sunday, etc. in main cal
+    headerOptions:{
+        valign: 'middle',
+        align: 'center',
+        fill:'000055',
+        color:'FFFFFF'
+    },
+    // options for body calendar cells and date number present
+    bodyOptions: {
+        valign:'top',
+        align:'left', 
+        font_size:14, 
+        color: '880000', 
+        fill: 'FFFFFF', 
+        italic: true
+    },
+    emptyOptions: {
+        fill: 'FFFFE0'
+    },
+    miniCalOptions: {
+        valign:'top',
+        align:'center', 
+        color: '880000', 
+        fill: 'FFFFE0', 
+        margin:0
+    },
+    miniCalUnderlineColor: {
+        pt: '1',
+        color: '880000'
+    },
+    // i.e. January
+    titleTextOptions: {
+        color:'000055', 
+        valign: 'middle'
+    },
+    eventTextOptions: {
+        color:'880000'
+    }
+};
+
+
+export const DefaultSettings: SettingsModel = {
+    formatting: DefaultFormattingSettings,
+    events: [],
+    banners: {
+        January: '', February: '', March: '', April: '', May: '', June: '',
+        July: '', August: '', September: '', October: '', November: '', December: ''
+    },
+    // get next year
+    year: new Date().getFullYear() + 1
 }
 
 // var rowData = generateDaysTable(month,year,options.bodyOptions,options.emptyOptions,NO_BORDER, settings.calendarBorder);
