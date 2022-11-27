@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 declare global {
-    function parseHoliday(date: string, adjust: boolean)
+    function parseHoliday(date: string, adjust: boolean): any
 }
 
 function arrayify(arr: any[]) {

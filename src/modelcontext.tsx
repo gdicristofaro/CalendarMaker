@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { SettingsModel } from "./model";
+import { DefaultSettings, SettingsModel } from "./model";
 
 const KEY = "settings";
 
@@ -12,18 +12,22 @@ export interface ModelContextProps {
 
 export const ModelContext = React.createContext<ModelContextProps>({
     settings: undefined,
-    update: (newSettings: SettingsModel) => {}
+    update: (newSettings: SettingsModel) => { }
 });
 
 
-export const ModelContextComponent = (props: { children: any, initialSettings: SettingsModel }) => {
-    const [model, setModel] = useState<SettingsModel>(props.initialSettings);
+export const ModelContextComponent = (props: { children: any }) => {
+    const [model, setModel] = useState(() => {
+        const saved = localStorage.getItem(KEY);
+        const initialValue = saved && JSON.parse(saved);
+        return initialValue || DefaultSettings;
+    });
 
     useEffect(() => {
         localStorage.setItem(KEY, JSON.stringify(model))
     }, [model]);
 
-    return (<ModelContext.Provider value={{settings: model, update: setModel }}>
+    return (<ModelContext.Provider value={{ settings: model, update: setModel }}>
         {props.children}
     </ModelContext.Provider>)
 }

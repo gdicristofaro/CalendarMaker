@@ -1,24 +1,25 @@
+import { DefaultFormattingSettings } from "./pptxgen";
+
 export interface SettingsModel {
-    Formatting: PptxSettings;
-    Events: DateEventModel[];
-    Banners:
-        {
-            January: string, February: string, March: string, April: string, May: string, June: string,
-            July: string, August: string, September: string, October: string, November: string, December: string
-        };
-    Year: number;
+    formatting: PptxSettings;
+    events: DateEventModel[];
+    banners:
+    {
+        January: string, February: string, March: string, April: string, May: string, June: string,
+        July: string, August: string, September: string, October: string, November: string, December: string
+    };
+    year: number;
+}
 
-    // constructor() {
-    //     this.Formatting = $.extend(true, {}, PptxGen.DefaultSettings);
-
-    //     this.Events = []; //[{EventName: "New Years", ImageDataUrl: "", DateString: "1/21"}];
-    //     this.Banners =
-    //     {
-    //         January: '', February: '', March: '', April: '', May: '', June: '',
-    //         July: '', August: '', September: '', October: '', November: '', December: ''
-    //     };
-    //     this.Year = new Date().getFullYear() + 1;
-    // }
+export const DefaultSettings: SettingsModel = {
+    formatting: DefaultFormattingSettings,
+    events: [],
+    banners: {
+        January: '', February: '', March: '', April: '', May: '', June: '',
+        July: '', August: '', September: '', October: '', November: '', December: ''
+    },
+    // get next year
+    year: new Date().getFullYear() + 1
 }
 
 
@@ -99,3 +100,13 @@ export interface PptxSettings {
     titleTextOptions: TitleTextOptions;
     eventTextOptions: EventTextOptions;
 }
+
+// var rowData = generateDaysTable(month,year,options.bodyOptions,options.emptyOptions,NO_BORDER, settings.calendarBorder);
+// var rows = rowData.rows;
+// rows.unshift(getHeaderArr(options.headerOpts, settings.calendarBorder));
+
+// slide.addTable(rows, tabOpts);
+
+
+// generateMiniCalendars(slide, options.miniCalOptions, options.miniCalHeaderOptions, 
+//     x, rowData.rowNumber, rowData.topLeftCells, rowData.bottomRightCells, month, year);
