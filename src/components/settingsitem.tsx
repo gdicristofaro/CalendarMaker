@@ -8,6 +8,7 @@ import ColorPicker from './colorpicker';
 import Paper from '@mui/material/Paper';
 import SmallLabel from './smalllabel';
 import { useState } from 'react';
+import { PptxSettings } from '../model';
 
 export enum VerticalAlign {
     top = "top",
@@ -152,8 +153,8 @@ const SettingsItem = (props: {
 
 
 const AllFormatSettings = (props: {
-    model: {[key: string]: any},
-    onChange: (model: {[key: string]: any}) => void
+    model: PptxSettings, //{[key: string]: any},
+    onChange: (model: PptxSettings) => void
 }) => {
     
 

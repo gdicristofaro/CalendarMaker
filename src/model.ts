@@ -11,7 +11,7 @@ export interface SettingsModel {
 
 export interface DateEventModel {
     eventName: string;
-    imageDataUrl: string;
+    imageDataUrl: string | undefined;
     dateString: string;
 }
 
