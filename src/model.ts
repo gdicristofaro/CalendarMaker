@@ -88,6 +88,10 @@ export interface PptxSettings {
 }
 
 
+export const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+export const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+export const WEEK_NUMBER = ["1st","2nd","3rd","4th","5th"];
+
 
 // default settings for calendar
 export const DefaultFormattingSettings: PptxSettings = {

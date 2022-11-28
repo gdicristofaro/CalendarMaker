@@ -6,12 +6,12 @@ const KEY = "settings";
 
 
 export interface ModelContextProps {
-    settings: undefined | SettingsModel;
+    settings: SettingsModel;
     update: (newSettings: SettingsModel) => void
 }
 
 export const ModelContext = React.createContext<ModelContextProps>({
-    settings: undefined,
+    settings: DefaultSettings,
     update: (newSettings: SettingsModel) => { }
 });
 

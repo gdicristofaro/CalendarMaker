@@ -10,10 +10,11 @@ import ImageLoader from './imageloader';
 import { create as pptxCreate } from '../pptxgen'
 import { } from '../parseholiday';
 import * as download from 'downloadjs';
-import {DateEventModel, SettingsModel} from '../model';
+import {DateEntry, DateEventModel, DefaultSettings, MONTHS, SettingsModel} from '../model';
 import Dialog from '@mui/material/Dialog';
 import DeleteIcon from '@mui/icons-material/Delete';
-import React from 'react';
+import React, { useContext } from 'react';
+import { ModelContext } from '../modelcontext';
 
 
 
@@ -22,8 +23,8 @@ const MainComponent = (props: {
     showResetDialog: boolean
 }) => {
 
-
     let cookieSettings = localStorage.getItem('settings');
+    let context = useContext(ModelContext);
 
 
     // this.state = {
@@ -41,10 +42,10 @@ const MainComponent = (props: {
     // }
 
 
-    let dateComps = this.state.settings.Events.map((val,i,arr) => {
+    let dateComps = context.settings?.events.map((val,i,arr) => {
         return (
             <DateEvent
-                Model = {val}
+                model = {val}
                 key= {"datecomp" + i.toString()}
                 onUpdate={() => this.saveSettings()}
                 onDelete = {() => { arr.splice(i,1); this.forceUpdate();}}
@@ -52,11 +53,11 @@ const MainComponent = (props: {
         );
     });
     
-    let bannerComps = DateEvent.months.map((val,i,arr) => {
+    let bannerComps = MONTHS.map((val,i,arr) => {
         return (
             <div key={"bannerDiv" + i.toString()} style={{margin: 20, display: 'inline-block', verticalAlign: 'top'}}>
                 <ImageLoader
-                    initialDataUrl={this.state.settings.Banners[val]}
+                    initialDataUrl={context.settings?.banners?[val] || "" }
                     key= {"banneritem" + i.toString()}
                     onDataUrl={(durl) => { this.state.settings.Banners[val] = durl; this.forceUpdate(); }}
                     title={"Choose banner for " + arr[i] + "..."}
@@ -76,28 +77,33 @@ const MainComponent = (props: {
 
         reader.addEventListener("load", 
             () => {
-                var extended = $.extend(true, {}, new SettingsModel(), JSON.parse(reader.result));
-                this.setState({settings: extended });
+                let extended = {...DefaultSettings, ...JSON.parse(reader.result) };
+                this.setState({settings: extended })
             }
         );
         reader.readAsText(file);
     };
 
 
-    let pptxHandler = (e)=> {
-        var s = this.state.settings;
-        var year = s.Year;
-        var events = s.Events.map((val) => {
-            var date = ParseHoliday.parse(val.dateString + "/" + year.toString(), undefined);
-            return new DateEntry(date.getMonth() + 1, date.getDate(), val.eventName, val.imageDataUrl);
+    let pptxHandler = (e: any) => {
+        let settings = context.settings;
+        let year = settings.year;
+        let events = settings.events.map((val) => {
+            let date = parseHoliday(val.dateString + "/" + year.toString(), false);
+            return {
+                month: date.getMonth() + 1, 
+                date: date.getDate(), 
+                name: val.eventName,
+                image: val.imageDataUrl
+            }
         });
 
-        let banners = DateEvent.months.map((val) => s.Banners[val]);
+        let banners: any[] = MONTHS.map((val) => settings.banners[val]);
 
-        pptxCreate(s.Formatting, events, banners, s.Year);
+        pptxCreate(settings.formatting, events, banners, settings.year);
     };
 
-    let formatSettings = this.state.settings.Formatting;
+    let formatSettings = context.settings.formatting;
 
     return (
         <div>

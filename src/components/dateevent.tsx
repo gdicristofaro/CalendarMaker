@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import SmallLabel from './smalllabel';
-import {DateEventModel} from '../model';
+import {DateEventModel, DAYS, MONTHS, WEEK_NUMBER} from '../model';
 import { useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 
@@ -26,10 +26,6 @@ enum DateType {
     Custom
 }
 
-
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const WEEK_NUMBER = ["1st","2nd","3rd","4th","5th"];
 
 
 const matchDate = (dateString: string) : DateTypeInfo => { 
@@ -159,7 +155,7 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
                     value={ weekNumber } 
                     onChange={(evt) => onDateString(`${month}/(${dayOfWeek},${evt.target.value})`)}
                 >
-                    {WEEK_NUMBER.map((val,ind) => { return (
+                    {WEEsK_NUMBER.map((val,ind) => { return (
                         <MenuItem key={"weekNumSelector" + ind.toString()} value={ind+1}>
                             {val}
                         </MenuItem>
