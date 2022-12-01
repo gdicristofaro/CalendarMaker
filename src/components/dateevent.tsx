@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -80,24 +79,11 @@ const matchDate = (dateString: string) : DateTypeInfo => {
 
 
 /**
- * when date string changes, should be called
- * @param newDateString the new date string
- */
-const onDateString = (newDateString: string, forceUpdate: boolean = true) => {
-    props.model.dateString = newDateString;
-    props.onUpdate(); 
-
-    if (forceUpdate)
-        forceUpdate();
-}
-
-
-/**
  * generates a date selector (i.e. January 10)
  * @param month the month (1 is January)
  * @param day the day of the month
  */
-const getDateSelector = (month: number, day: number) => {
+const getDateSelector = (month: number, day: number, onDateString: (newDateString: string) => void) => {
     return (
         <div style={CELL_STYLE}>
             <DatePicker
@@ -117,7 +103,7 @@ const getDateSelector = (month: number, day: number) => {
  * @param weekNumber the week number (1 is 1st week)
  * @param dayOfWeek the day of the week (0 is Sunday)
  */
-const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: number) => {
+const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: number, onDateString: (newDateString: string) => void) => {
     return (
         <div>
             <div style={CELL_STYLE}>
@@ -155,7 +141,7 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
                     value={ weekNumber } 
                     onChange={(evt) => onDateString(`${month}/(${dayOfWeek},${evt.target.value})`)}
                 >
-                    {WEEsK_NUMBER.map((val,ind) => { return (
+                    {WEEK_NUMBER.map((val,ind) => { return (
                         <MenuItem key={"weekNumSelector" + ind.toString()} value={ind+1}>
                             {val}
                         </MenuItem>
@@ -172,7 +158,7 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
  * @param day the day of the month
  * @param dayOfWeek the day of the week (0 is Sunday)
  */
-const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number) => {
+const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number, onDateString: (newDateString: string) => void) => {
     return (
         <div>
             <div style={CELL_STYLE}>
@@ -202,7 +188,7 @@ const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number)
 }
 
 
-const getCustomSelector = (dateString: string) => {
+const getCustomSelector = (dateString: string, onDateString: (newDateString: string) => void) => {
     return (
         <div style={CELL_STYLE}>
             <TextField
@@ -229,11 +215,12 @@ const CELL_STYLE = {
 const DateEvent = (props: {
     onDelete: () => void,
     model: DateEventModel,
-    onUpdate() : void
+    onUpdate: (updated: DateEventModel) => void
 }) => {
+    let {model, onUpdate, onDelete} = props;
     let [dateType, setDateType] = useState(matchDate(props.model.dateString).dateType); 
 
-
+    let onDateString = (newDateString: string) => onUpdate({...model, ...{dateString: newDateString}});
 
     let dateString = props.model.dateString;
 
@@ -247,17 +234,17 @@ const DateEvent = (props: {
     let DateSelector;
     switch (dateType) {
         case DateType.Date:
-            DateSelector = getDateSelector(month, day);
+            DateSelector = getDateSelector(month, day, onDateString);
             break;
         case DateType.WeekdayMonth:
-            DateSelector = getWeekdayMonthSelector(month, week, weekday);
+            DateSelector = getWeekdayMonthSelector(month, week, weekday, onDateString);
             break;
         case DateType.WeekdayBefore:
-            DateSelector = getWeekdayBeforeSelector(month, day, weekday);
+            DateSelector = getWeekdayBeforeSelector(month, day, weekday, onDateString);
             break;
         case DateType.Custom:
         default:
-            DateSelector = getCustomSelector(dateString);
+            DateSelector = getCustomSelector(dateString, onDateString);
     }
 
     return (
@@ -267,10 +254,8 @@ const DateEvent = (props: {
                     // hintText="Name" 
                     value={props.model.eventName} 
                     onChange={(evt) => {
-                        let value = evt.target.textContent;
-                        props.model.eventName = value; 
-                        props.onUpdate();
-                        forceUpdate();
+                        let value = evt.target.textContent || "";
+                        onUpdate({...model, ...{eventName: value}});
                     }} 
                     title="Event Name" 
                 />
@@ -300,8 +285,8 @@ const DateEvent = (props: {
                         };
                 
                         console.log(newDateString);
-                        onDateString(newDateString, false);
-                        setDateType(val);
+                        onDateString(newDateString);
+                        onUpdate({...model, ...{dateString: newDateString}});
                     }}
                     autoWidth={true}
                 >
@@ -317,11 +302,9 @@ const DateEvent = (props: {
             <div style={CELL_STYLE}>
                 <ImageLoader 
                     title="Choose Image..." 
-                    initialDataUrl={props.model.imageDataUrl} 
+                    initialDataUrl={props.model.imageDataUrl || ""} 
                     onDataUrl={(durl) => {
-                        props.model.imageDataUrl = durl; 
-                        props.onUpdate(); 
-                        forceUpdate();
+                        onUpdate({...model, ...{imageDataUrl: durl}});
                     }}
                 />
             </div>
@@ -329,7 +312,7 @@ const DateEvent = (props: {
                 <IconButton
                     // iconStyle={{width: 48, height: 48}}
                     // style={{width: 96, height: 96, padding: 20}}
-                    onClick={() => props.onDelete()}
+                    onClick={() => onDelete()}
                 >
                     <DeleteIcon />
                 </IconButton>

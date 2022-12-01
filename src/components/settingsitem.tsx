@@ -40,7 +40,7 @@ const SettingsItem = (props: {
     initialValue: any,
     type: SettingsType
 }) => {
-    
+
     let [value, setValue] = useState(props.initialValue);
 
     let baseComponent = undefined;
@@ -63,27 +63,27 @@ const SettingsItem = (props: {
         case SettingsType.HorizontalAlign:
         case SettingsType.VerticalAlign:
             let options = (props.type == SettingsType.HorizontalAlign) ?
-            [
-                {text: "Left", value: HorizontalAlign.left},
-                {text: "Center", value: HorizontalAlign.center},
-                {text: "Right", value: HorizontalAlign.right}
-            ] :
-            [
-                {text: "Top", value: VerticalAlign.top},
-                {text: "Middle", value: VerticalAlign.middle},
-                {text: "Bottom", value: VerticalAlign.bottom}
-            ];
+                [
+                    { text: "Left", value: HorizontalAlign.left },
+                    { text: "Center", value: HorizontalAlign.center },
+                    { text: "Right", value: HorizontalAlign.right }
+                ] :
+                [
+                    { text: "Top", value: VerticalAlign.top },
+                    { text: "Middle", value: VerticalAlign.middle },
+                    { text: "Bottom", value: VerticalAlign.bottom }
+                ];
 
-            let items = options.map((v,i) => (
+            let items = options.map((v, i) => (
                 <MenuItem value={v.value} key={"menuItem" + i.toString()}>v.text</MenuItem>
             ));
-    
+
             baseComponent = (
                 <div>
                     <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
-                    <Select 
-                        style={{marginLeft: '-24px', marginTop: '-10px'}} 
-                        value={value} 
+                    <Select
+                        style={{ marginLeft: '-24px', marginTop: '-10px' }}
+                        value={value}
                         onChange={evt => {
                             props.setter(evt.target.value);
                             setValue(evt.target.value);
@@ -92,7 +92,7 @@ const SettingsItem = (props: {
                         {items}
                     </Select>
                 </div>
-            ); 
+            );
             break;
 
         case SettingsType.Color:
@@ -104,7 +104,7 @@ const SettingsItem = (props: {
                         onUpdate={(v) => {
                             props.setter(v);
                             setValue(v);
-                         }}
+                        }}
                     />
                 </div>
             );
@@ -123,7 +123,7 @@ const SettingsItem = (props: {
             );
             break;
 
-        case SettingsType.Number: 
+        case SettingsType.Number:
         case SettingsType.Text:
         default:
             let textFieldType = props.type == SettingsType.Number ? "number" : undefined;
@@ -132,8 +132,8 @@ const SettingsItem = (props: {
                 type={textFieldType}
                 value={value}
                 title={props.title}
-                onChange={(e) => { 
-                    props.setter(e.target.value); 
+                onChange={(e) => {
+                    props.setter(e.target.value);
                     setValue(e.target.value);
                 }}
             />);
@@ -141,7 +141,7 @@ const SettingsItem = (props: {
     }
 
     return (
-        <div style={{margin: '10px 0px'}}>
+        <div style={{ margin: '10px 0px' }}>
             {baseComponent}
         </div>
     )
@@ -156,15 +156,27 @@ const AllFormatSettings = (props: {
     model: PptxSettings, //{[key: string]: any},
     onChange: (model: PptxSettings) => void
 }) => {
-    
 
-    let getField = (parentObject: {[key: string]: any}, key: string, type: SettingsType, title: string, hintText: string | undefined = undefined) => {
+    let { model, onChange } = props;
+    let updateField = (ancestorFields: string[], value: any) => {
+        let copiedModel: PptxSettings = structuredClone(model);
+        let currParent: any = copiedModel;
+        for (let i = 0; i < ancestorFields.length - 1; i++) {
+            let field = ancestorFields[i];
+            currParent = currParent[field];
+        }
+        
+        currParent[ancestorFields[ancestorFields.length - 1]] = value;
+        onChange(copiedModel);
+    }
+
+    let getField = (onSettingsUpdate: (newVal: any) => void, initialVal: any, type: SettingsType, title: string, hintText: string | undefined = undefined) => {
         return (
             <div className="SettingsItem">
                 <SettingsItem
                     title={title}
-                    setter={(v) => { parentObject[key] = v; props.onChange(parentObject); }}
-                    initialValue={parentObject[key]}
+                    setter={onSettingsUpdate}
+                    initialValue={initialVal}
                     type={type}
                     hint={hintText}
                 />
@@ -172,13 +184,13 @@ const AllFormatSettings = (props: {
         );
     }
 
-    let getPt = (parentObject: {[key: string]: any}, key: string, title: string, hintText: string | undefined = undefined) => {
+    let getPt = (onSettingsUpdate: (newVal: any) => void, initialVal: any, title: string, hintText: string | undefined = undefined) => {
         return (
             <div className="SettingsItem">
                 <SettingsItem
                     title={title}
-                    setter={(v) => { parentObject[key] = v.toString(); props.onChange(parentObject); }}
-                    initialValue={parseInt(parentObject[key], 10)}
+                    setter={onSettingsUpdate}
+                    initialValue={parseInt(initialVal, 10)}
                     type={SettingsType.Number}
                     hint={hintText}
                 />
@@ -186,7 +198,7 @@ const AllFormatSettings = (props: {
         );
     }
 
-    const paperStyle ={
+    const paperStyle = {
         padding: 10,
         margin: 10
     };
@@ -194,61 +206,78 @@ const AllFormatSettings = (props: {
     return (
         <div>
             <Paper style={paperStyle}>
-                <div style={{margin: "10px 0px"}}>
-                    <h2 style={{margin: 0}}>General</h2>
+                <div style={{ margin: "10px 0px" }}>
+                    <h2 style={{ margin: 0 }}>General</h2>
                 </div>
-                {getField(props.model, "pptxName" ,SettingsType.Text, "PowerPoint File Name")}
-                {getField(props.model, "font" ,SettingsType.Text, "Font Type", "Power Point Font Type")}
-                {getField(props.model.emptyOptions, "fill" ,SettingsType.Color, "Color of Empty Table Cells")}
-                {getField(props.model.eventTextOptions, "color" ,SettingsType.Color, "Event Text Color", "(i.e. the color of the text for 'Christmas Day')")}
+                {getField((newName) => updateField(["pptxName"], newName),
+                    model.pptxName, SettingsType.Text, "PowerPoint File Name")}
+                {getField((newFont) => updateField(["font"], newFont),
+                    model.font, SettingsType.Text, "Font Type", "Power Point Font Type")}
+                {getField((newFill) => updateField(["emptyOptions", "fill"] , newFill),
+                    model.emptyOptions.fill, SettingsType.Color, "Color of Empty Table Cells")}
+                {getField((newColor) => updateField(["eventTextOptions", "color"], newColor),
+                    model.eventTextOptions.color, SettingsType.Color, "Event Text Color", 
+                    "(i.e. the color of the text for 'Christmas Day')")}
             </Paper>
             <Paper style={paperStyle}>
-                <div style={{margin: "10px 0px"}}>
-                    <h2 style={{margin: 0}}>Calendar Border</h2>
+                <div style={{ margin: "10px 0px" }}>
+                    <h2 style={{ margin: 0 }}>Calendar Border</h2>
                 </div>
-                {getPt(props.model.calendarBorder, "pt", "Width", "in points")}
-                {getField(props.model.calendarBorder, "color" ,SettingsType.Color, "Color")}
+                {getPt((newPt) => updateField(["calendarBorder", "pt"], newPt), 
+                    model.calendarBorder.pt, "Width", "in points")}
+                {getField((newColor) => updateField(["calendarBorder", "color"], newColor),
+                    model.calendarBorder.color, SettingsType.Color, "Color")}
             </Paper>
             <Paper style={paperStyle}>
-                <div style={{margin: "10px 0px"}}>
-                    <h2 style={{margin: 0}}>Calendar Header</h2>
-                    <span style={{fontFamily: 'Roboto, sans-serif', fontStyle: 'italic'}}>(i.e. Sunday, Monday, Tuesday)</span>
+                <div style={{ margin: "10px 0px" }}>
+                    <h2 style={{ margin: 0 }}>Calendar Header</h2>
+                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. Sunday, Monday, Tuesday)</span>
                 </div>
-                {getField(props.model.headerOptions, "valign" ,SettingsType.VerticalAlign, "Vertical Alignment")}
-                {getField(props.model.headerOptions, "align" ,SettingsType.HorizontalAlign, "Horizontal Alignment")}
-                {getField(props.model.headerOptions, "fill" ,SettingsType.Color, "Background Color")}
-                {getField(props.model.headerOptions, "color" ,SettingsType.Color, "Text Color")}
+                {getField((newVal) => updateField(["headerOptions", "valign"], newVal), 
+                    model.headerOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment")}
+                {getField((newVal) => updateField(["headerOptions", "align"], newVal),
+                    model.headerOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
+                {getField((newVal) => updateField(["headerOptions", "fill"], newVal),
+                    model.headerOptions.fill, SettingsType.Color, "Background Color")}
+                {getField((newVal) => updateField(["headerOptions", "color"], newVal), 
+                    model.headerOptions.color, SettingsType.Color, "Text Color")}
             </Paper>
             <Paper style={paperStyle}>
-                <div style={{margin: "10px 0px"}}>                    
-                    <h2 style={{margin: 0}}>Calendar Number</h2>
-                    <span style={{fontFamily: 'Roboto, sans-serif', fontStyle: 'italic'}}>(i.e. the "21" for the date in a box)</span>
+                <div style={{ margin: "10px 0px" }}>
+                    <h2 style={{ margin: 0 }}>Calendar Number</h2>
+                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. the "21" for the date in a box)</span>
                 </div>
-                {getField(props.model.bodyOptions, "align" ,SettingsType.HorizontalAlign, "Horizontal Alignment")}
-                {getField(props.model.bodyOptions, "color" ,SettingsType.Color, "Color")}
-                {getField(props.model.bodyOptions, "fill" ,SettingsType.Color, "Fill")}
-                {getField(props.model.bodyOptions, "italic", SettingsType.Boolean, "Italicize Text")}
+                {getField((newVal) => updateField(["bodyOptions", "align"], newVal),
+                    model.bodyOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
+                {getField((newVal) => updateField(["bodyOptions", "color"], newVal), 
+                    model.bodyOptions.color, SettingsType.Color, "Color")}
+                {getField((newVal) => updateField(["bodyOptions", "fill"], newVal), 
+                    model.bodyOptions.fill, SettingsType.Color, "Fill")}
+                {getField((newVal) => updateField(["bodyOptions", "italic"], newVal),
+                    model.bodyOptions.italic, SettingsType.Boolean, "Italicize Text")}
             </Paper>
             <Paper style={paperStyle}>
-                <div style={{margin: "10px 0px"}}>                    
-                    <h2 style={{margin: 0}}>Miniature Calendar Options</h2>
-                    <span style={{fontFamily: 'Roboto, sans-serif', fontStyle: 'italic'}}>(i.e. if the month is February, the smaller calendar for March)</span>
+                <div style={{ margin: "10px 0px" }}>
+                    <h2 style={{ margin: 0 }}>Miniature Calendar Options</h2>
+                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. if the month is February, the smaller calendar for March)</span>
                 </div>
-                {getField(props.model.miniCalOptions, "valign" ,SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
-                {getField(props.model.miniCalOptions, "align" ,SettingsType.HorizontalAlign, "Horizontal Alignment in EmptySpace")}
-                {getField(props.model.miniCalOptions, "color" ,SettingsType.Color, "Color")}
-                {getField(props.model.miniCalOptions, "fill" ,SettingsType.Color, "Fill")}
-                {getPt(props.model.miniCalUnderlineColor, "pt", "Header Border Width", "the seperator between the header items like 'M', 'T', etc. in points")}
-                {getField(props.model.miniCalUnderlineColor, "color" ,SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
+                {getField((newVal) => updateField(["miniCalOptions", "valign"], newVal),
+                    model.miniCalOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
+                {getField((newVal) => updateField(["miniCalOptions", "align"], newVal), 
+                    model.miniCalOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment in EmptySpace")}
+                {getField(model.miniCalOptions.color, SettingsType.Color, "Color")}
+                {getField(model.miniCalOptions.fill, SettingsType.Color, "Fill")}
+                {getPt(model.miniCalUnderlineColor.pt, "Header Border Width", "the seperator between the header items like 'M', 'T', etc. in points")}
+                {getField(model.miniCalUnderlineColor.color, SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
             </Paper>
 
             <Paper style={paperStyle}>
-                <div style={{margin: "10px 0px"}}>    
-                    <h2 style={{margin: 0}}>Calendar Title Text</h2>
-                    <span style={{fontFamily: 'Roboto, sans-serif', fontStyle: 'italic'}}>(i.e. like 'January')</span>
+                <div style={{ margin: "10px 0px" }}>
+                    <h2 style={{ margin: 0 }}>Calendar Title Text</h2>
+                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. like 'January')</span>
                 </div>
-                {getField(props.model.titleTextOptions, "valign" ,SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
-                {getField(props.model.titleTextOptions, "color" ,SettingsType.Color, "Color")}
+                {getField(model.titleTextOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
+                {getField(model.titleTextOptions.color, SettingsType.Color, "Color")}
             </Paper>
         </div>
     );

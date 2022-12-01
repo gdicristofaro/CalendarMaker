@@ -44,9 +44,7 @@ function TabPanel(props: TabPanelProps) {
   }
 
 
-const MainComponent = (props: {
-    showResetDialog: boolean
-}) => {
+const MainComponent = (props: {}) => {
 
     let [tabIdx, setTabIdx] = useState(0);
     let [showReset, setShowReset] = useState(false);
