@@ -265,10 +265,14 @@ const AllFormatSettings = (props: {
                     model.miniCalOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
                 {getField((newVal) => updateField(["miniCalOptions", "align"], newVal), 
                     model.miniCalOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment in EmptySpace")}
-                {getField(model.miniCalOptions.color, SettingsType.Color, "Color")}
-                {getField(model.miniCalOptions.fill, SettingsType.Color, "Fill")}
-                {getPt(model.miniCalUnderlineColor.pt, "Header Border Width", "the seperator between the header items like 'M', 'T', etc. in points")}
-                {getField(model.miniCalUnderlineColor.color, SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
+                {getField((newVal) => updateField(["miniCalOptions", "color"], newVal),
+                    model.miniCalOptions.color, SettingsType.Color, "Color")}
+                {getField((newVal) => updateField(["miniCalOptions", "fill"], newVal),
+                    model.miniCalOptions.fill, SettingsType.Color, "Fill")}
+                {getPt((newVal) => updateField(["miniCalUnderlineColor", "pt"], newVal),
+                    model.miniCalUnderlineColor.pt, "Header Border Width", "the seperator between the header items like 'M', 'T', etc. in points")}
+                {getField((newVal) => updateField(["miniCalUnderlineColor", "color"], newVal),
+                    model.miniCalUnderlineColor.color, SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
             </Paper>
 
             <Paper style={paperStyle}>
@@ -276,8 +280,10 @@ const AllFormatSettings = (props: {
                     <h2 style={{ margin: 0 }}>Calendar Title Text</h2>
                     <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. like 'January')</span>
                 </div>
-                {getField(model.titleTextOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
-                {getField(model.titleTextOptions.color, SettingsType.Color, "Color")}
+                {getField((newVal) => updateField(["titleTextOptions", "valign"], newVal),
+                    model.titleTextOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
+                {getField((newVal) => updateField(["titleTextOptions", "color"], newVal),
+                    model.titleTextOptions.color, SettingsType.Color, "Color")}
             </Paper>
         </div>
     );
