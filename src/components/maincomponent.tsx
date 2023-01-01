@@ -50,25 +50,37 @@ const MainComponent = (props: {}) => {
     let [showReset, setShowReset] = useState(false);
     let context = useContext(ModelContext);
 
-
     let dateComps = context.settings?.events.map((val,i,arr) => {
         return (
             <DateEvent
                 model = {val}
                 key= {"datecomp" + i.toString()}
-                onUpdate={() => this.saveSettings()}
-                onDelete = {() => { arr.splice(i,1); this.forceUpdate();}}
+                onUpdate={(updateEvt) => {
+                    let copiedSettings : SettingsModel = structuredClone(context.settings);
+                    copiedSettings.events[i] = updateEvt;
+                    context.update(copiedSettings);
+                }}
+                onDelete={() => { 
+                    let copiedSettings : SettingsModel = structuredClone(context.settings);
+                    copiedSettings.events.splice(i,1);
+                    context.update(copiedSettings);
+                }}
             />
         );
     });
     
     let bannerComps = MONTHS.map((val,i,arr) => {
+        let initialBannerDataUrl : string = (context.settings.banners as any)[val] || "";
         return (
             <div key={"bannerDiv" + i.toString()} style={{margin: 20, display: 'inline-block', verticalAlign: 'top'}}>
                 <ImageLoader
-                    initialDataUrl={context.settings?.banners?[val] || "" }
+                    initialDataUrl={initialBannerDataUrl}
                     key= {"banneritem" + i.toString()}
-                    onDataUrl={(durl) => { this.state.settings.Banners[val] = durl; this.forceUpdate(); }}
+                    onDataUrl={(durl) => { 
+                        let copiedSettings : SettingsModel = structuredClone(context.settings);
+                        (copiedSettings.banners as any)[val] = durl;
+                        context.update(copiedSettings);
+                    }}
                     title={"Choose banner for " + arr[i] + "..."}
                 />
             </div>
@@ -86,8 +98,10 @@ const MainComponent = (props: {}) => {
 
         reader.addEventListener("load", 
             () => {
-                let extended = {...DefaultSettings, ...JSON.parse(reader.result) };
-                this.setState({settings: extended })
+                if (reader.result) {
+                    let extended = {...DefaultSettings, ...JSON.parse(reader.result as string) };
+                    context.update(extended);
+                }
             }
         );
         reader.readAsText(file);
@@ -103,7 +117,7 @@ const MainComponent = (props: {}) => {
                 month: date.getMonth() + 1, 
                 day: date.getDate(), 
                 name: val.eventName,
-                img: val.imageDataUrl
+                img: val.imageDataUrl || ""
             }
         });
 
@@ -136,7 +150,11 @@ const MainComponent = (props: {}) => {
             <TextField
                 title="Year for Calendar"
                 type="number"
-                onChange={(e) => {context.settings.year = parseInt(e.target.value,10); this.forceUpdate(); }}
+                onChange={(e) => {
+                    let copiedSettings : SettingsModel = structuredClone(context.settings);
+                    copiedSettings.year = parseInt(e.target.value,10);
+                    context.update(copiedSettings);
+                }}
                 value={(context.settings.year) ? context.settings.year : new Date().getFullYear() + 1}
                 style={{paddingLeft: '10px'}}
             />
@@ -147,7 +165,11 @@ const MainComponent = (props: {}) => {
                     <Tab label="Banners" value={2} />
                 </Tabs>
                 <TabPanel index={0} value={tabIdx}>
-                    <AllFormatSettings model ={formatSettings} onChange={() => this.forceUpdate()}/>
+                    <AllFormatSettings model={formatSettings} onChange={(newSettings) => {
+                        let copiedSettings : SettingsModel = structuredClone(context.settings);
+                        copiedSettings.formatting = newSettings;
+                        context.update(copiedSettings);
+                    }}/>
                 </TabPanel>
                 <TabPanel index={1} value={tabIdx}>
                     {dateComps}
@@ -161,7 +183,9 @@ const MainComponent = (props: {}) => {
                                     imageDataUrl: undefined
                                 }
 
-                                this.forceUpdate();
+                                let copiedSettings : SettingsModel = structuredClone(context.settings);
+                                copiedSettings.events.push(dateEvtModel);
+                                context.update(copiedSettings);
                             }} 
                         />
                     </div>
@@ -173,7 +197,7 @@ const MainComponent = (props: {}) => {
             <Button
                 style={{margin: 10}}
                 title="Clear All Settings"
-                onClick={() => this.setState({showResetDialog: true})}
+                onClick={() => setShowReset(true)}
             />
             <Dialog
                 open={showReset}
@@ -191,7 +215,13 @@ const MainComponent = (props: {}) => {
                 </DialogContent>
                 <DialogActions>
                 <Button onClick={() => setShowReset(false)}>Cancel</Button>
-                <Button onClick={() => { this.setState({settings: new SettingsModel()}); setShowReset(false)}} autoFocus>
+                <Button 
+                    onClick={() => { 
+                        context.update(DefaultSettings); 
+                        setShowReset(false);
+                    }}
+                    autoFocus
+                >
                     Agree
                 </Button>
                 </DialogActions>

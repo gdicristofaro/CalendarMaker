@@ -36,14 +36,15 @@ const ColorPicker = (props: {
     initialColor: string 
 }) => {
     let [display, setDisplay] = useState<boolean>();
-    let [color, setColor] = useState<string>(props.initialColor);
+    // let [color, setColor] = useState<string>(props.initialColor);
 
+    let {onUpdate, initialColor} = props;
     let updatedColor = {
         ...ROOT_STYLE.color,
-        background: `#${color}`
+        background: `#${initialColor}`
     };
 
-    let styles = { ...ROOT_STYLE, updatedColor };
+    let styles = { ...ROOT_STYLE, color: updatedColor };
 
     return (
         <div>
@@ -54,9 +55,12 @@ const ColorPicker = (props: {
                 <div style={ styles.popover }>
                     <div style={ styles.cover } onClick={ () => setDisplay(false) }/>
                     <SketchPicker 
-                        color={(styles as any).color.background} 
+                        color={initialColor} 
                         disableAlpha={true} 
-                        onChangeComplete = { (c: any) => setColor(c.hex.substring(1)) } 
+                        onChangeComplete = { (c: any) => {
+                          let colorStr = c.hex.substring(1);
+                          onUpdate(colorStr);
+                        }} 
                     />
                 </div> : 
                 null 
