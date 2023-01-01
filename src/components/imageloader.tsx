@@ -43,19 +43,18 @@ const ImageLoader = (props: {
     return (
         <Paper style={{padding: 10, display: 'inline-block'}}>
             <div style={{marginRight: 10, display: 'inline-block'}}>
-                {/* TODO: what is this? */}
                 <Button
-                    // style={{margin: 5}}
-                    // containerElement='label'
-                    // label={this.props.title}
+                    style={{margin: 5}}
+                    component='label'
                 >
+                    {props.title}
                     <input type="file" onChange={ (e) => handleChange(e.target.files as FileList)} style={{display: 'none'}}/>
                 </Button>
             </div>
             <div style={{ display: 'inline-block'}}>
                 <IconButton
                     // iconStyle={{width: 32, height: 32}}
-                    // style={{ padding: 8}}
+                    style={{ padding: 8}}
                     onClick={() => { props.onDataUrl(""); setImage(""); }}
                 >
                     <DeleteIcon />

@@ -109,7 +109,6 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
             <div style={CELL_STYLE}>
                 <SmallLabel text="Month" />
                 <Select 
-                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={month} 
                     onChange={(evt) => onDateString(`${evt.target.value}/(${dayOfWeek},${weekNumber})`)}
                 >
@@ -137,7 +136,6 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
             <div style={CELL_STYLE}>
                 <SmallLabel text="Week Number of Month" />
                 <Select 
-                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={ weekNumber } 
                     onChange={(evt) => onDateString(`${month}/(${dayOfWeek},${evt.target.value})`)}
                 >
@@ -172,7 +170,6 @@ const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number,
             <div style={CELL_STYLE}>
                 <SmallLabel text="Month" />
                 <Select 
-                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
                     value={dayOfWeek} 
                     onChange={(evt) => onDateString(`${month}/(${evt.target.value},[-${day}])`) }
                 >
@@ -266,7 +263,6 @@ const DateEvent = (props: {
             >
                 <SmallLabel text="Date Type" />
                 <Select 
-                    style={{marginLeft: '-24px', marginTop: '-10px'}}
                     value={dateType} 
                     onChange={(evt) => {
                         let val = evt.target.value;
@@ -311,7 +307,7 @@ const DateEvent = (props: {
             <div style={CELL_STYLE}>
                 <IconButton
                     // iconStyle={{width: 48, height: 48}}
-                    // style={{width: 96, height: 96, padding: 20}}
+                    style={{width: 96, height: 96, padding: 20}}
                     onClick={() => onDelete()}
                 >
                     <DeleteIcon />

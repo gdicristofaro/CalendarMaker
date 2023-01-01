@@ -75,14 +75,14 @@ const SettingsItem = (props: {
                 ];
 
             let items = options.map((v, i) => (
-                <MenuItem value={v.value} key={"menuItem" + i.toString()}>v.text</MenuItem>
+                <MenuItem value={v.value} key={"menuItem" + i.toString()}>{v.text}</MenuItem>
             ));
 
             baseComponent = (
                 <div>
                     <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
                     <Select
-                        style={{ marginLeft: '-24px', marginTop: '-10px' }}
+                        // style={{ marginLeft: '-24px', marginTop: '-10px' }}
                         value={value}
                         onChange={evt => {
                             props.setter(evt.target.value);

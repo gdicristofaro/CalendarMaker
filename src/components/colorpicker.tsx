@@ -36,8 +36,6 @@ const ColorPicker = (props: {
     initialColor: string 
 }) => {
     let [display, setDisplay] = useState<boolean>();
-    // let [color, setColor] = useState<string>(props.initialColor);
-
     let {onUpdate, initialColor} = props;
     let updatedColor = {
         ...ROOT_STYLE.color,
