@@ -6,90 +6,28 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import SmallLabel from './smalllabel';
-import {DateEventModel, DAYS, MONTHS, WEEK_NUMBER} from '../model';
+import { DateEventModel, DateTypeInfo, DAYS, MONTHS, WEEK_NUMBER } from '../model';
 import { useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
-
-export interface DateTypeInfo {
-    dateType: DateType,
-    month?: number,
-    weekday?: number,
-    day?: number,
-    week?: number
-}
-
-enum DateType {
-    Date,
-    WeekdayMonth,
-    WeekdayBefore,
-    Custom
-}
-
-
-
-const matchDate = (dateString: string) : DateTypeInfo => { 
-    // match day of week before date
-    let beforeDateRegex = /([0-9]{1,2})\/\(([0-9]),\[-([0-9]{1,2})\]\)/g;
-    let beforeDateMatch = beforeDateRegex.exec(dateString);
-    if (beforeDateMatch) {
-        return {
-            dateType: DateType.WeekdayBefore,
-            month: parseInt(beforeDateMatch[1],10),
-            weekday: parseInt(beforeDateMatch[2],10),
-            day: parseInt(beforeDateMatch[3],10),
-            week: undefined
-        };
-    }
-
-    // match day of week of month
-    let dayOfWeekRegex = /([0-9]{1,2})\/\(([0-9]),([0-9])\)/g;
-    let dayOfWeekMatch = dayOfWeekRegex.exec(dateString);
-    if (dayOfWeekMatch) {
-        console.log("dayOfWeekMatch", dayOfWeekMatch)
-        return {
-            dateType: DateType.WeekdayMonth,
-            month: parseInt(dayOfWeekMatch[1],10),
-            weekday: parseInt(dayOfWeekMatch[2],10),
-            day: undefined,
-            week: parseInt(dayOfWeekMatch[3],10)
-        };
-    }
-
-    // match date 
-    let dateRegex = /([0-9]{1,2})\/([0-9]{1,2})/g;
-    let dateMatch = dateRegex.exec(dateString);
-    if (dateMatch) {
-        return {
-            dateType: DateType.Date,
-            month: parseInt(dateMatch[1],10),
-            day: parseInt(dateMatch[2],10),
-            weekday: undefined,
-            week: undefined
-        };
-    }
-
-    return {
-        dateType: DateType.Custom,
-        month: undefined,
-        day: undefined,
-        weekday: undefined,
-        week: undefined
-    };
-}
 
 
 /**
  * generates a date selector (i.e. January 10)
  * @param month the month (1 is January)
  * @param day the day of the month
+ * @param onUpdate Function to call when value is updated.
  */
-const getDateSelector = (month: number, day: number, onDateString: (newDateString: string) => void) => {
+const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
         <div style={CELL_STYLE}>
             <DatePicker
                 label="Date for Event"
                 value={new Date(new Date().getFullYear(), month - 1, day)}
-                onChange={(value: Dayjs | null) => value && onDateString(`${value.month() + 1}/${value.date()}`) }
+                onChange={(value: Dayjs | null) => value && onUpdate({
+                    dateType: "Date",
+                    month: value.month() + 1,
+                    dayNum: value.date()
+                })}
                 renderInput={(params) => <TextField {...params} />}
             />
         </div>
@@ -100,50 +38,73 @@ const getDateSelector = (month: number, day: number, onDateString: (newDateStrin
 /**
  * generates a weekday of week of month selector (i.e. 3rd Sunday of May)
  * @param month the month (1 is January)
- * @param weekNumber the week number (1 is 1st week)
+ * @param week the week number (1 is 1st week)
  * @param dayOfWeek the day of the week (0 is Sunday)
+ * @param onUpdate When info is updated
  */
-const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: number, onDateString: (newDateString: string) => void) => {
+const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number, onUpdate: (dateItem: DateTypeInfo) => void) => {
     return (
         <div>
             <div style={CELL_STYLE}>
                 <SmallLabel text="Month" />
-                <Select 
-                    value={month} 
-                    onChange={(evt) => onDateString(`${evt.target.value}/(${dayOfWeek},${weekNumber})`)}
+                <Select
+                    value={month}
+                    onChange={(evt) => onUpdate({
+                        dateType: 'WeekdayMonth',
+                        month: evt.target.value as number,
+                        dayOfWeek,
+                        week
+                    }
+                    )}
                 >
-                    {MONTHS.map((val,ind) => { return (
-                        <MenuItem key={"monthSelector" + ind.toString()} value={ind + 1}>
-                            {val}
-                        </MenuItem> 
-                    )})}
+                    {MONTHS.map((val, ind) => {
+                        return (
+                            <MenuItem key={"monthSelector" + ind.toString()} value={ind + 1}>
+                                {val}
+                            </MenuItem>
+                        )
+                    })}
                 </Select>
             </div>
             <div style={CELL_STYLE}>
                 <SmallLabel text="Day of the Week" />
-                <Select 
-                    style={{marginLeft: '-24px', marginTop: '-10px'}} 
-                    value={dayOfWeek} 
-                    onChange={(evt) => onDateString(`${month}/(${evt.target.value},${weekNumber})`)}
+                <Select
+                    style={{ marginLeft: '-24px', marginTop: '-10px' }}
+                    value={dayOfWeek}
+                    onChange={(evt) => onUpdate({
+                        dateType: 'WeekdayMonth',
+                        month,
+                        dayOfWeek: evt.target.value as number,
+                        week
+                    })}
                 >
-                    {DAYS.map((val,ind) => { return (
-                        <MenuItem key={"daySelector" + ind.toString()} value={ind}>
-                            {val}
-                        </MenuItem>
-                    )})}
+                    {DAYS.map((val, ind) => {
+                        return (
+                            <MenuItem key={"daySelector" + ind.toString()} value={ind}>
+                                {val}
+                            </MenuItem>
+                        )
+                    })}
                 </Select>
             </div>
             <div style={CELL_STYLE}>
                 <SmallLabel text="Week Number of Month" />
-                <Select 
-                    value={ weekNumber } 
-                    onChange={(evt) => onDateString(`${month}/(${dayOfWeek},${evt.target.value})`)}
+                <Select
+                    value={week}
+                    onChange={(evt) => onUpdate({
+                        dateType: 'WeekdayMonth',
+                        month,
+                        dayOfWeek,
+                        week: evt.target.value as number
+                    })}
                 >
-                    {WEEK_NUMBER.map((val,ind) => { return (
-                        <MenuItem key={"weekNumSelector" + ind.toString()} value={ind+1}>
-                            {val}
-                        </MenuItem>
-                    )})}
+                    {WEEK_NUMBER.map((val, ind) => {
+                        return (
+                            <MenuItem key={"weekNumSelector" + ind.toString()} value={ind + 1}>
+                                {val}
+                            </MenuItem>
+                        )
+                    })}
                 </Select>
             </div>
         </div>
@@ -153,31 +114,44 @@ const getWeekdayMonthSelector = (month: number, weekNumber: number, dayOfWeek: n
 /**
  * the day of the week before a certain day (i.e. Sunday before July 3rd)
  * @param month the month (1 is January)
- * @param day the day of the month
+ * @param date the day of the month
  * @param dayOfWeek the day of the week (0 is Sunday)
+ * @param onUpdate When info is updated
  */
-const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number, onDateString: (newDateString: string) => void) => {
+const getWeekdayBeforeSelector = (month: number, date: number, dayOfWeek: number, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
         <div>
             <div style={CELL_STYLE}>
                 <DatePicker
                     label="Select Date For Event"
-                    value={new Date(new Date().getFullYear(), month - 1, day)}
-                    onChange={(value: Dayjs | null) => value && onDateString(`${value.month() + 1}/(${dayOfWeek},[-${value.date()}])`) }
+                    value={new Date(new Date().getFullYear(), month - 1, date)}
+                    onChange={(value: Dayjs | null) => value && onUpdate({
+                        dateType: 'WeekdayBefore',
+                        month: value.month() + 1,
+                        date: value.date(),
+                        dayOfWeek
+                    })}
                     renderInput={(params) => <TextField {...params} />}
                 />
             </div>
             <div style={CELL_STYLE}>
                 <SmallLabel text="Month" />
-                <Select 
-                    value={dayOfWeek} 
-                    onChange={(evt) => onDateString(`${month}/(${evt.target.value},[-${day}])`) }
+                <Select
+                    value={dayOfWeek}
+                    onChange={(evt) => onUpdate({
+                        dateType: 'WeekdayBefore',
+                        month,
+                        date,
+                        dayOfWeek: evt.target.value as number
+                    })}
                 >
-                    {DAYS.map((val,ind) => { return (
-                        <MenuItem value={ind} key={"weekdaybefore" + ind.toString()}>
-                            {val}
-                        </MenuItem>
-                    )})}
+                    {DAYS.map((val, ind) => {
+                        return (
+                            <MenuItem value={ind} key={"weekdaybefore" + ind.toString()}>
+                                {val}
+                            </MenuItem>
+                        )
+                    })}
                 </Select>
             </div>
         </div>
@@ -185,13 +159,13 @@ const getWeekdayBeforeSelector = (month: number, day: number, dayOfWeek: number,
 }
 
 
-const getCustomSelector = (dateString: string, onDateString: (newDateString: string) => void) => {
+const getCustomSelector = (dateString: string, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
         <div style={CELL_STYLE}>
             <TextField
-                value={dateString} 
+                value={dateString}
                 label="Custom Date"
-                onChange={(evt) => onDateString(evt.target.value) }
+                onChange={(evt) => onUpdate({ dateType: 'Custom', identifier: evt.target.value })}
             />
         </div>
     );
@@ -207,6 +181,18 @@ const CELL_STYLE = {
 };
 
 
+const getDateTypeComponent = (dateInfo: DateTypeInfo, onUpdate: (updated: DateTypeInfo) => void) => {
+    switch (dateInfo.dateType) {
+        case 'Date':
+            return getDateSelector(dateInfo.month, dateInfo.dayNum, onUpdate);
+        case 'WeekdayMonth':
+            return getWeekdayMonthSelector(dateInfo.month, dateInfo.week, dateInfo.dayOfWeek, onUpdate);
+        case 'WeekdayBefore':
+            return getWeekdayMonthSelector(dateInfo.month, dateInfo.date, dateInfo.dayOfWeek, onUpdate);
+        case 'Custom':
+            return getCustomSelector(dateInfo.identifier, onUpdate);
+    }
+}
 
 // defines a calendar event
 const DateEvent = (props: {
@@ -214,100 +200,99 @@ const DateEvent = (props: {
     model: DateEventModel,
     onUpdate: (updated: DateEventModel) => void
 }) => {
-    let {model, onUpdate, onDelete} = props;
-    let [dateType, setDateType] = useState(matchDate(props.model.dateString).dateType); 
+    let { model, onUpdate, onDelete } = props;
 
-    let onDateString = (newDateString: string) => onUpdate({...model, ...{dateString: newDateString}});
+    let dateTypeInfoUpdate = (updatedDateInfo: DateTypeInfo) => {
+        onUpdate({ ...model, dateInfo: updatedDateInfo });
+    };
 
-    let dateString = props.model.dateString;
+    let dateTypeComponent = getDateTypeComponent(
+        model.dateInfo,
+        dateTypeInfoUpdate
+    );
 
-    let matchRecord = matchDate(dateString);
-    
-    let month = matchRecord.month ? matchRecord.month : 1;
-    let day = matchRecord.day ? matchRecord.day : 1;
-    let week = matchRecord.week ? matchRecord.week : 1;
-    let weekday = matchRecord.weekday ? matchRecord.weekday : 0;
-
-    let DateSelector;
-    switch (dateType) {
-        case DateType.Date:
-            DateSelector = getDateSelector(month, day, onDateString);
-            break;
-        case DateType.WeekdayMonth:
-            DateSelector = getWeekdayMonthSelector(month, week, weekday, onDateString);
-            break;
-        case DateType.WeekdayBefore:
-            DateSelector = getWeekdayBeforeSelector(month, day, weekday, onDateString);
-            break;
-        case DateType.Custom:
-        default:
-            DateSelector = getCustomSelector(dateString, onDateString);
-    }
 
     return (
-        <div style={{padding: '10px', margin: '10px'}}>
+        <div style={{ padding: '10px', margin: '10px' }}>
             <div style={CELL_STYLE}>
-                <TextField 
+                <TextField
                     // hintText="Name" 
-                    value={props.model.eventName} 
+                    value={model.eventName}
                     onChange={(evt) => {
                         let value = evt.target.textContent || "";
-                        onUpdate({...model, ...{eventName: value}});
-                    }} 
-                    title="Event Name" 
+                        onUpdate({ ...model, ...{ eventName: value } });
+                    }}
+                    title="Event Name"
                 />
             </div>
-            <div style={{...CELL_STYLE, ...{
-                width: '256px',
-                position: 'relative' }}}
+            <div style={{
+                ...CELL_STYLE, ...{
+                    width: '256px',
+                    position: 'relative'
+                }
+            }}
             >
                 <SmallLabel text="Date Type" />
-                <Select 
-                    value={dateType} 
+                <Select
+                    value={model.dateInfo.dateType}
                     onChange={(evt) => {
                         let val = evt.target.value;
-                        let newDateString: string = '';
                         switch (val) {
-                            case DateType.WeekdayMonth:
-                                newDateString = `${month}/(${weekday},${week})`;
+                            case "WeekdayMonth":
+                                dateTypeInfoUpdate({
+                                    dateType: "WeekdayMonth",
+                                    dayOfWeek: 1,
+                                    month: 1, 
+                                    week: 1
+                                })
                                 break;
-                            case DateType.WeekdayBefore:
-                                newDateString = `${month}/(${weekday},[-${day}])`;
+                            case "WeekdayBefore":
+                                dateTypeInfoUpdate({
+                                    dateType: "WeekdayBefore",
+                                    date: 1,
+                                    dayOfWeek: 1, 
+                                    month: 1
+                                });
                                 break;
-                            case DateType.Custom:
-                            case DateType.Date:
-                                newDateString = `${month}/${day}`;
+                            case "Custom":
+                                dateTypeInfoUpdate({
+                                    dateType: 'Custom',
+                                    identifier: "Easter"
+                                });
+                                break;
+                            case "Date":
+                                dateTypeInfoUpdate({
+                                    dateType: "Date",
+                                    dayNum: 1,
+                                    month: 1
+                                })
                                 break;
                         };
-                
-                        console.log(newDateString);
-                        onDateString(newDateString);
-                        onUpdate({...model, ...{dateString: newDateString}});
                     }}
                     autoWidth={true}
                 >
-                    <MenuItem value={DateType.Date}>Date</MenuItem>
-                    <MenuItem value={DateType.WeekdayMonth}>Day of the Week for Week Number of Month</MenuItem>
-                    <MenuItem value={DateType.WeekdayBefore}>Day of the Week Before Date</MenuItem>
-                    <MenuItem value={DateType.Custom}>Custom Moment-Holiday Text</MenuItem>
+                    <MenuItem value="Date">Date</MenuItem>
+                    <MenuItem value="WeekdayMonth">Day of the Week for Week Number of Month</MenuItem>
+                    <MenuItem value="WeekdayBefore">Day of the Week Before Date</MenuItem>
+                    <MenuItem value="Custom">Custom Moment-Holiday Text</MenuItem>
                 </Select>
             </div>
             <div style={CELL_STYLE}>
-                {DateSelector}
+                {dateTypeComponent}
             </div>
             <div style={CELL_STYLE}>
-                <ImageLoader 
-                    title="Choose Image..." 
-                    initialDataUrl={props.model.imageDataUrl || ""} 
+                <ImageLoader
+                    title="Choose Image..."
+                    initialDataUrl={props.model.imageDataUrl || ""}
                     onDataUrl={(durl) => {
-                        onUpdate({...model, ...{imageDataUrl: durl}});
+                        onUpdate({ ...model, ...{ imageDataUrl: durl } });
                     }}
                 />
             </div>
             <div style={CELL_STYLE}>
                 <IconButton
                     // iconStyle={{width: 48, height: 48}}
-                    style={{width: 96, height: 96, padding: 20}}
+                    style={{ width: 96, height: 96, padding: 20 }}
                     onClick={() => onDelete()}
                 >
                     <DeleteIcon />

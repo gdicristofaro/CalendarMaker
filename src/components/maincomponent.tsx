@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import ImageLoader from './imageloader';
 import { create as pptxCreate } from '../pptxgen'
-import { } from '../parseholiday';
+import { parseHoliday } from '../parseholiday';
 import download from 'downloadjs';
 import { DateEntry, DateEventModel, DefaultSettings, MONTHS, SettingsModel } from '../model';
 import Dialog from '@mui/material/Dialog';
@@ -112,10 +112,10 @@ const MainComponent = (props: {}) => {
         let settings = context.settings;
         let year = settings.year;
         let events: DateEntry[] = settings.events.map((val) => {
-            let date = parseHoliday(val.dateString + "/" + year.toString(), false);
+            let date = parseHoliday(val.dateInfo, year);
             return {
-                month: date.getMonth() + 1,
-                day: date.getDate(),
+                month: date.month,
+                day: date.date,
                 name: val.eventName,
                 img: val.imageDataUrl || ""
             }
@@ -184,7 +184,11 @@ const MainComponent = (props: {}) => {
                             variant='contained'
                             onClick={(e) => {
                                 let dateEvtModel: DateEventModel = {
-                                    dateString: "1/1",
+                                    dateInfo: {
+                                        dateType: 'Date',
+                                        month: 1,
+                                        dayNum: 1
+                                    },
                                     eventName: "Event Name",
                                     imageDataUrl: undefined
                                 }

@@ -1,14 +1,14 @@
 import moment from 'moment';
-
-declare global {
-    function parseHoliday(date: string, adjust: boolean): any
-}
+import {DateTypeInfo, DateEntry} from './model';
 
 function arrayify(arr: any[]) {
     if (arr && arr.constructor !== Array) { return [arr]; }
     return arr;
 };
 
+export const parseHoliday = (dateInfo: DateTypeInfo, year: number): { month: number, date: number } => {
+
+}
 
 
 // taken from https://github.com/kodie/moment-holiday

@@ -1,22 +1,32 @@
+export const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+export const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+export const WEEK_NUMBER = ["1st","2nd","3rd","4th","5th"];
+
 export interface SettingsModel {
     formatting: PptxSettings;
     events: DateEventModel[];
-    banners:
-    {
-        January: string, February: string, March: string, April: string, May: string, June: string,
-        July: string, August: string, September: string, October: string, November: string, December: string
-    };
+    banners: { [month: typeof MONTHS[number]]: string }
     year: number;
 }
+
+
+
+export type DateTypeInfo = 
+    { dateType: "Date", month: number, dayNum: number } |
+    { dateType: "WeekdayMonth", month: number, week: number, dayOfWeek: number } |
+    { dateType: "WeekdayBefore", month: number, date: number, dayOfWeek: number } |
+    { dateType: "Custom", identifier: string };
+
 
 export interface DateEventModel {
     eventName: string;
     imageDataUrl: string | undefined;
-    dateString: string;
+    dateInfo: DateTypeInfo;
 }
 
 
-// information pertaining to the date
+
+// calculated information pertaining to date event
 export interface DateEntry {
     month: number,
     day: number,
@@ -88,9 +98,6 @@ export interface PptxSettings {
 }
 
 
-export const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-export const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-export const WEEK_NUMBER = ["1st","2nd","3rd","4th","5th"];
 
 
 // default settings for calendar
@@ -142,10 +149,7 @@ export const DefaultFormattingSettings: PptxSettings = {
 export const DefaultSettings: SettingsModel = {
     formatting: DefaultFormattingSettings,
     events: [],
-    banners: {
-        January: '', February: '', March: '', April: '', May: '', June: '',
-        July: '', August: '', September: '', October: '', November: '', December: ''
-    },
+    banners: Object.fromEntries(MONTHS.map(m => ([m, '']))),
     // get next year
     year: new Date().getFullYear() + 1
 }
@@ -159,3 +163,56 @@ export const DefaultSettings: SettingsModel = {
 
 // generateMiniCalendars(slide, options.miniCalOptions, options.miniCalHeaderOptions, 
 //     x, rowData.rowNumber, rowData.topLeftCells, rowData.bottomRightCells, month, year);
+
+
+
+
+// const matchDate = (dateString: string) : DateTypeInfo => { 
+//     // match day of week before date
+//     let beforeDateRegex = /([0-9]{1,2})\/\(([0-9]),\[-([0-9]{1,2})\]\)/g;
+//     let beforeDateMatch = beforeDateRegex.exec(dateString);
+//     if (beforeDateMatch) {
+//         return {
+//             dateType: DateType.WeekdayBefore,
+//             month: parseInt(beforeDateMatch[1],10),
+//             weekday: parseInt(beforeDateMatch[2],10),
+//             day: parseInt(beforeDateMatch[3],10),
+//             week: undefined
+//         };
+//     }
+
+//     // match day of week of month
+//     let dayOfWeekRegex = /([0-9]{1,2})\/\(([0-9]),([0-9])\)/g;
+//     let dayOfWeekMatch = dayOfWeekRegex.exec(dateString);
+//     if (dayOfWeekMatch) {
+//         console.log("dayOfWeekMatch", dayOfWeekMatch)
+//         return {
+//             dateType: DateType.WeekdayMonth,
+//             month: parseInt(dayOfWeekMatch[1],10),
+//             weekday: parseInt(dayOfWeekMatch[2],10),
+//             day: undefined,
+//             week: parseInt(dayOfWeekMatch[3],10)
+//         };
+//     }
+
+//     // match date 
+//     let dateRegex = /([0-9]{1,2})\/([0-9]{1,2})/g;
+//     let dateMatch = dateRegex.exec(dateString);
+//     if (dateMatch) {
+//         return {
+//             dateType: DateType.Date,
+//             month: parseInt(dateMatch[1],10),
+//             day: parseInt(dateMatch[2],10),
+//             weekday: undefined,
+//             week: undefined
+//         };
+//     }
+
+//     return {
+//         dateType: DateType.Custom,
+//         month: undefined,
+//         day: undefined,
+//         weekday: undefined,
+//         week: undefined
+//     };
+// }
