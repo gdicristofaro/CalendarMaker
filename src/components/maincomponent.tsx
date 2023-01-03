@@ -11,10 +11,9 @@ import { parseHoliday } from '../parseholiday';
 import download from 'downloadjs';
 import { DateEntry, DateEventModel, DefaultSettings, MONTHS, SettingsModel } from '../model';
 import Dialog from '@mui/material/Dialog';
-import DeleteIcon from '@mui/icons-material/Delete';
 import React, { useContext, useState } from 'react';
 import { ModelContext } from '../modelcontext';
-import { Box, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
+import { Box, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 
 interface TabPanelProps {
@@ -92,7 +91,6 @@ const MainComponent = (props: {}) => {
             return;
 
         let file = selectorFiles[0];
-        let fileType = file.type.toUpperCase().trim();
 
         let reader = new FileReader();
 

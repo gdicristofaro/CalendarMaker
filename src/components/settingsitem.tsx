@@ -62,7 +62,7 @@ const SettingsItem = (props: {
             break;
         case SettingsType.HorizontalAlign:
         case SettingsType.VerticalAlign:
-            let options = (props.type == SettingsType.HorizontalAlign) ?
+            let options = (props.type === SettingsType.HorizontalAlign) ?
                 [
                     { text: "Left", value: HorizontalAlign.left },
                     { text: "Center", value: HorizontalAlign.center },
@@ -126,7 +126,7 @@ const SettingsItem = (props: {
         case SettingsType.Number:
         case SettingsType.Text:
         default:
-            let textFieldType = props.type == SettingsType.Number ? "number" : undefined;
+            let textFieldType = props.type === SettingsType.Number ? "number" : undefined;
 
             baseComponent = (<TextField
                 type={textFieldType}

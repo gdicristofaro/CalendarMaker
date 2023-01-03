@@ -1,5 +1,4 @@
 // creates dataurl from image upload
-import {useState} from 'react';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
@@ -13,9 +12,6 @@ const ImageLoader = (props: {
     initialDataUrl: string,
     title: string
 }) => {
-
-    let [image, setImage] = useState<string>(props.initialDataUrl);
-
     let handleChange = (selectorFiles: FileList) => {
         if (!selectorFiles || selectorFiles.length <= 0)
             return;
@@ -28,13 +24,13 @@ const ImageLoader = (props: {
 
         let reader = new FileReader();
 
-        reader.addEventListener("load", () => { setImage(reader.result as string); props.onDataUrl(reader.result as string) });
+        reader.addEventListener("load", () => { props.onDataUrl(reader.result as string) });
         reader.readAsDataURL(file);
     }
 
 
     let imgComp = (props.initialDataUrl && props.initialDataUrl.length > 0) ?
-        (<img src={props.initialDataUrl} 
+        (<img src={props.initialDataUrl} alt="Selected File"
             style={{maxWidth: '200px', maxHeight: '200px', display: 'inline-block', margin: '0 auto'}} 
             className="boxshadowed marginv20" 
         />) :
@@ -55,7 +51,7 @@ const ImageLoader = (props: {
                 <IconButton
                     // iconStyle={{width: 32, height: 32}}
                     style={{ padding: 8}}
-                    onClick={() => { props.onDataUrl(""); setImage(""); }}
+                    onClick={() => { props.onDataUrl(""); }}
                 >
                     <DeleteIcon />
                 </IconButton>

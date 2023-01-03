@@ -7,8 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import SmallLabel from './smalllabel';
 import { DateEventModel, DateTypeInfo, DAYS, MONTHS, WEEK_NUMBER } from '../model';
-import { useState } from 'react';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 
 
 /**

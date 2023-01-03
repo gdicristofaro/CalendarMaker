@@ -1,8 +1,7 @@
 import { format, getDay, getDaysInMonth } from 'date-fns';
 import { BorderOptions, DateEntry, Dimension, HeaderOptions, CalOptions, PptxSettings, EventTextOptions } from './model';
 import { parseNumYears } from './parsenumyears';
-
-declare let PptxGenJS : any;
+import pptxgen from "pptxgenjs";
 
 const DAYS_OF_WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -74,9 +73,9 @@ const getHeaderArr = (headerOpts: HeaderOptions, calendarBorder: BorderOptions) 
     return DAYS_OF_WEEK.map((day, index, arr) => { 
         let border = [
             calendarBorder,
-            index == arr.length - 1 ? calendarBorder : NO_BORDER,
+            index === arr.length - 1 ? calendarBorder : NO_BORDER,
             calendarBorder,
-            index == 0 ? calendarBorder : NO_BORDER
+            index === 0 ? calendarBorder : NO_BORDER
         ]
         return { text: day, options: {...{border: border}, ...headerOpts}}; 
     });
@@ -111,8 +110,8 @@ const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts:
     // add extra days until we get to start day for month
     let startDay = getDay(date);
     for (let i = 0; i < startDay; i++) {
-        let leftBorder = (i == 0) ? defaultborder : emptyborder;
-        let rightBorder = (i == startDay - 1) ? defaultborder : emptyborder;
+        let leftBorder = (i === 0) ? defaultborder : emptyborder;
+        let rightBorder = (i === startDay - 1) ? defaultborder : emptyborder;
         let theseEmptyOpts = {...{border: [defaultborder, rightBorder, defaultborder, leftBorder]}, ...emptyopts};
         arr.push({text: '', options: theseEmptyOpts});
     }
@@ -129,9 +128,9 @@ const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts:
     let bottomRightCells = 0;
 
     // get to the end of the week
-    while (arr.length % 7 != 0) {
-        let leftBorder = (curArrDay == 0) ? defaultborder : emptyborder;
-        let rightBorder : BorderOptions = (arr.length % 7 == 6) ? defaultborder : emptyborder;
+    while (arr.length % 7 !== 0) {
+        let leftBorder = (curArrDay === 0) ? defaultborder : emptyborder;
+        let rightBorder : BorderOptions = (arr.length % 7 === 6) ? defaultborder : emptyborder;
         let theseEmptyOpts = {...{border: [defaultborder, rightBorder, defaultborder, leftBorder]}, ...emptyopts};
         arr.push({text: '', options: theseEmptyOpts});
         bottomRightCells++;
@@ -397,7 +396,7 @@ const addMiniCalendar = (slide: any, miniCalOpts: CalOptions, miniCalHeaderOpts:
     prevMonthCal.unshift(getMiniHeaderArr(miniCalHeaderOpts));
 
     const prevDate = new Date(year, month, 1);
-    const prevMonthString = format(prevDate, "MMM") + " " + format(prevDate, "YYYY");
+    const prevMonthString = `${format(prevDate, "MMM")} ${format(prevDate, "yyyy")}`;
     const spacing = {text:' ', options:miniCalOpts};
     const spacingArr = [spacing, spacing, spacing, spacing, spacing, spacing, spacing];
 
@@ -522,7 +521,7 @@ const generateMonthCalendar = async (slide: any, options: PptxSettings, month: n
     let date = new Date(year, month, 1);
 
     // get month string like January 2018
-    let monthStr = format(date, "MMMM") + " " + format(date, "YYYY");
+    let monthStr = `${format(date, "MMMM")} ${format(date, "yyyy")}`;
 
     await addBanner(slide, imagepath);
     
@@ -616,8 +615,8 @@ const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => 
  * @param year The year.
  */
 export const create = async (settings: PptxSettings, events: DateEntry[], banners:string[], year: number) => {
-    let pptx = new PptxGenJS();
-    pptx.setLayout('LAYOUT_4x3');
+    let pptx = new pptxgen();
+    pptx.layout = 'LAYOUT_4x3';
 
     let dates : {[day: number] : DateEntry[]}[] = [];
 
@@ -628,11 +627,10 @@ export const create = async (settings: PptxSettings, events: DateEntry[], banner
         let thisDate = new Date(year, ev.month - 1, ev.day);
 
         // ensure that this item belongs in this year
-        if (thisDate.getFullYear() != year)
+        if (thisDate.getFullYear() !== year)
             continue;
 
         let monthItems = dates[thisDate.getMonth()];
-        let dayItems;
         if (!monthItems[thisDate.getDate()])
             monthItems[thisDate.getDate()] = new Array<DateEntry>();
         
@@ -640,10 +638,10 @@ export const create = async (settings: PptxSettings, events: DateEntry[], banner
     }
 
     for (let i = 0; i < 12; i++) {
-        let slide = pptx.addNewSlide();
+        let slide = pptx.addSlide();
         let bannerToUse = (banners && banners.length > i) ? banners[i] : undefined;
         await generateMonthCalendar(slide, settings, i, year, bannerToUse, dates[i]);
     }
 
-    pptx.save(settings.pptxName + '-' + year.toString()); 
+    pptx.writeFile({ fileName: `${settings.pptxName}-${year.toString()}` }); 
 }

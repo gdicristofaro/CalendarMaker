@@ -25,7 +25,7 @@ export const numToOrdinalStr = (num: number) => {
     let onesPlace = num % 10;
     let tensPlace = (num / 10) % 10;
     
-    if (tensPlace == 1)
+    if (tensPlace === 1)
         return num.toString() + 'th';
 
     let ending = '';
