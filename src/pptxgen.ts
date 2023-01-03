@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { format, getDay, getDaysInMonth } from 'date-fns';
 import { BorderOptions, DateEntry, Dimension, HeaderOptions, CalOptions, PptxSettings, EventTextOptions } from './model';
 import { parseNumYears } from './parsenumyears';
 
@@ -102,14 +102,14 @@ const getMiniHeaderArr = (miniCalHeaderOpts: CalOptions) => {
  *   rows - rows to be used with addTable
  */
 const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts: any, emptyborder: BorderOptions, defaultborder: BorderOptions) => {
-    let date = moment(new Date(year, month, 1));
+    let date = new Date(year, month, 1);
 
-    let monthDays = date.daysInMonth();
+    let monthDays = getDaysInMonth(date);
 
     let arr = [];
 
     // add extra days until we get to start day for month
-    let startDay = date.day();
+    let startDay = getDay(date);
     for (let i = 0; i < startDay; i++) {
         let leftBorder = (i == 0) ? defaultborder : emptyborder;
         let rightBorder = (i == startDay - 1) ? defaultborder : emptyborder;
@@ -396,8 +396,8 @@ const addMiniCalendar = (slide: any, miniCalOpts: CalOptions, miniCalHeaderOpts:
     let prevMonthCal = generateDaysTable(month,year,miniCalOpts,miniCalOpts,NO_BORDER,NO_BORDER).rows;
     prevMonthCal.unshift(getMiniHeaderArr(miniCalHeaderOpts));
 
-    const prevDate = moment(new Date(year, month, 1));
-    const prevMonthString = prevDate.format("MMM") + " " + prevDate.format("YYYY");
+    const prevDate = new Date(year, month, 1);
+    const prevMonthString = format(prevDate, "MMM") + " " + format(prevDate, "YYYY");
     const spacing = {text:' ', options:miniCalOpts};
     const spacingArr = [spacing, spacing, spacing, spacing, spacing, spacing, spacing];
 
@@ -519,10 +519,10 @@ const addBanner = async (slide: any, imagepath: string | undefined) => {
  */
 const generateMonthCalendar = async (slide: any, options: PptxSettings, month: number, year: number, imagepath: string | undefined, dates: {[day: number] : DateEntry[]}) => {
 
-    let date = moment(new Date(year, month, 1));
+    let date = new Date(year, month, 1);
 
     // get month string like January 2018
-    let monthStr = date.format("MMMM") + " " + date.format("YYYY");
+    let monthStr = format(date, "MMMM") + " " + format(date, "YYYY");
 
     await addBanner(slide, imagepath);
     

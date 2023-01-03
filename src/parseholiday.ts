@@ -1,183 +1,112 @@
-import moment from 'moment';
-import {DateTypeInfo, DateEntry} from './model';
+import { addDays, addWeeks, getDay, setDay } from 'date-fns';
+import {DateTypeInfo } from './model';
 
-function arrayify(arr: any[]) {
-    if (arr && arr.constructor !== Array) { return [arr]; }
-    return arr;
-};
 
 export const parseHoliday = (dateInfo: DateTypeInfo, year: number): { month: number, date: number } => {
+    switch (dateInfo.dateType) {
+        case 'Date': return {month: dateInfo.month, date: dateInfo.dayNum };
+        case 'WeekdayMonth': return { month: dateInfo.month, date: getNthDayOfMonth(year, dateInfo.month, dateInfo.dayOfWeek, dateInfo.week)};
+        case 'WeekdayBefore': return { month: dateInfo.month, date: getWeekDayBefore(year, dateInfo.month, dateInfo.dayOfWeek, dateInfo.date)};
+        case 'Custom': return getCustomDate(year, dateInfo.identifier);
+    }
+}
 
+const getWeekDayBefore = (year: number, month: number, dayOfWeek: number, date: number): number => {
+    let maxLimitDate = new Date(year, month, date);
+    let maxLimitDayOfWeek = getDay(maxLimitDate);
+    let dayDiff = maxLimitDayOfWeek - dayOfWeek;
+    while (dayDiff < 0) {
+        dayDiff += 7;
+    }
+
+    let dateBefore = addDays(maxLimitDate, -dayDiff);
+    return dateBefore.getDate();
 }
 
 
-// taken from https://github.com/kodie/moment-holiday
-export const calculateEaster = (Y: number) => {
-    var C = Math.floor(Y/100);
-    var N = Y - 19*Math.floor(Y/19);
-    var K = Math.floor((C - 17)/25);
-    var I = C - Math.floor(C/4) - Math.floor((C - K)/3) + 19*N + 15;
+const getCustomDate = (year: number, identifier: string): { month: number; date: number; } => {
+    switch (identifier.toLowerCase()) {
+        case "easter":
+            return calculateEaster(year);
+        default:
+            console.warn(`Could not create custom date for: ${identifier}.  Returning 1/1`);
+            return { month: 1, date: 1 };
+    }
+}
+
+
+
+const getNthDayOfMonth = (year: number, month: number, weekDay: number, nth: number): number => {
+    let startOfMonth = new Date(year, month, 1);
+    let firstWeekDayOfMonth = setDay(startOfMonth, weekDay, {weekStartsOn: getDay(startOfMonth) });
+    let nthWeekDayOfMonth = addWeeks(firstWeekDayOfMonth, nth - 1);
+    return nthWeekDayOfMonth.getDate();
+}
+
+// const matchDate = (dateString: string) : DateTypeInfo => { 
+//     // match day of week before date
+//     let beforeDateRegex = /([0-9]{1,2})\/\(([0-9]),\[-([0-9]{1,2})\]\)/g;
+//     let beforeDateMatch = beforeDateRegex.exec(dateString);
+//     if (beforeDateMatch) {
+//         return {
+//             dateType: DateType.WeekdayBefore,
+//             month: parseInt(beforeDateMatch[1],10),
+//             weekday: parseInt(beforeDateMatch[2],10),
+//             day: parseInt(beforeDateMatch[3],10),
+//             week: undefined
+//         };
+//     }
+
+//     // match day of week of month
+//     let dayOfWeekRegex = /([0-9]{1,2})\/\(([0-9]),([0-9])\)/g;
+//     let dayOfWeekMatch = dayOfWeekRegex.exec(dateString);
+//     if (dayOfWeekMatch) {
+//         console.log("dayOfWeekMatch", dayOfWeekMatch)
+//         return {
+//             dateType: DateType.WeekdayMonth,
+//             month: parseInt(dayOfWeekMatch[1],10),
+//             weekday: parseInt(dayOfWeekMatch[2],10),
+//             day: undefined,
+//             week: parseInt(dayOfWeekMatch[3],10)
+//         };
+//     }
+
+//     // match date 
+//     let dateRegex = /([0-9]{1,2})\/([0-9]{1,2})/g;
+//     let dateMatch = dateRegex.exec(dateString);
+//     if (dateMatch) {
+//         return {
+//             dateType: DateType.Date,
+//             month: parseInt(dateMatch[1],10),
+//             day: parseInt(dateMatch[2],10),
+//             weekday: undefined,
+//             week: undefined
+//         };
+//     }
+
+//     return {
+//         dateType: DateType.Custom,
+//         month: undefined,
+//         day: undefined,
+//         weekday: undefined,
+//         week: undefined
+//     };
+// }
+
+
+// taken from https://stackoverflow.com/questions/1284314/easter-date-in-javascript
+const calculateEaster = (year: number) => {
+    let C = Math.floor(year/100);
+    let N = year - 19*Math.floor(year/19);
+    let K = Math.floor((C - 17)/25);
+    let I = C - Math.floor(C/4) - Math.floor((C - K)/3) + 19*N + 15;
     I = I - 30*Math.floor((I/30));
     I = I - Math.floor(I/28)*(1 - Math.floor(I/28)*Math.floor(29/(I + 1))*Math.floor((21 - N)/11));
-    var J = Y + Math.floor(Y/4) + I + 2 - C + Math.floor(C/4);
+    let J = year + Math.floor(year/4) + I + 2 - C + Math.floor(C/4);
     J = J - 7*Math.floor(J/7);
-    var L = I - J;
-    var M = 3 + Math.floor((L + 40)/44);
-    var D = L + 28 - 31*Math.floor(M/4);
-    return moment([Y, (M - 1), D]);
-}
+    let L = I - J;
+    let M = 3 + Math.floor((L + 40)/44);
+    let D = L + 28 - 31*Math.floor(M/4);
 
-export const easterParser = (date:string) : any => {
-    if (~date.indexOf('easter')) {
-        var dates = date.split('|');
-        var ds = [];
-
-        for (var i = 0; i < dates.length; i++) {
-            let easterComp;
-            if (dates[i].substring(0, 6) === 'easter') {
-                var easterSplit = dates[i].split('/');
-                var year = easterSplit[easterSplit.length - 1];
-                easterComp = easterSplit[0];
-                var e = calculateEaster(parseInt(year, 10));
-
-                if (easterComp.charAt(6) === '-') { e.subtract(easterComp.substring(7), 'days'); }
-                if (easterComp.charAt(6) === '+') { e.add(easterComp.substring(7), 'days'); }
-
-                if (parseInt(easterComp, 10) === 1) { return e; }
-                ds.push(e.format('M/D'));
-            } else {
-                ds.push(easterComp);
-            }
-        }
-
-        if (ds.length) { return ds.join('|'); }
-    }
-}
-
-
-const parserExtensions = [
-    easterParser
-];
-
-export const parse = (date: string, adjust: boolean) => {
-    var days = [], pd;
-
-    for (var i = 0; i < parserExtensions.length; i++) {
-        var pe = parserExtensions[i](date);
-        if (pe || pe === false) { pd = pe; }
-    }
-
-    if (pd === false) { return false; } 
-    if (typeof pd === 'string') { date = pd; } else if (pd) { days = pd; }
-
-    if (!moment.isMoment(days) && !days.length && date.charAt(0).match(/[0-9(]/)) {
-        var range = false;
-        var dates = date.split('|');
-
-        if (dates.length > 1) { range = true; }
-        if (dates.length > 2) { dates = [dates[0], dates[1]]; }
-
-        for (var i = 0; i < dates.length; i++) {
-            var m = moment();
-            var ds = dates[i].split('/');
-
-            if (ds.length === 1 || (ds.length === 2 && ds[1].charAt(0) !== '(' && ds[1].length === 4)) {
-                var td = dates[i];
-                i = -1;
-                dates = [];
-                for (var ii = 1; ii < 13; ii++) { dates.push(ii + '/' + td); }
-                continue;
-            }
-
-            if (ds.length > 2) { m.year(parseInt(ds[2])); }
-
-            m.month((parseInt(ds[0]) - 1));
-
-            if (ds[1].charAt(0) === '(') {
-                var w = ds[1].slice(1, -1).split(',');
-                var wd = parseInt(w[0]);
-                var dt = parseInt(w[1]);
-                var d = moment(m).startOf('month');
-                var limit = (moment(m).endOf('month').diff(d, 'days') + 1);
-                var wds = [];
-
-                if (w[1] && w[1].charAt(0) === '[') {
-                    var forward = true;
-                    dt = parseInt(w[1].slice(1, -1));
-
-                    if (dt < 0) {
-                        forward = false;
-                        dt = parseInt(w[1].slice(2, -1));
-                    }
-
-                    d = moment(m).date(dt);
-
-                    for (var wi = 0; wi < 7; wi++) {
-                        if (d.day() === wd) { days.push(moment(d)); break; }
-
-                        if (forward) {
-                            d.add(1, 'day');
-                        } else {
-                            d.subtract(1, 'day');
-                        }
-                    }
-
-                    continue;
-                }
-
-                for (var ai = 0; ai < limit; ai++) {
-                    if (d.day() === wd) { wds.push(moment(d)); }
-                    d.add(1, 'day');
-                }
-
-                if (!dt) {
-                    days = days.concat(wds);
-                    continue;
-                } else if (dt < 0) {
-                    m = wds[wds.length + dt];
-                } else {
-                    m = wds[dt - 1];
-                }
-
-                days.push(m);
-            } else {
-                days.push(m.date(parseInt(ds[1])));
-            }
-        }
-
-        if (range && days.length > 1) {
-            var diff = days[1].diff(days[0], 'days');
-
-            if (diff > 1) {
-                var di = moment(days[0]);
-                days = [days[0]];
-
-                for (var i = 0; i < diff; i++) {
-                    di.add(1, 'day');
-                    days.push(moment(di));
-                }
-            }
-        }
-    }
-
-    days = arrayify(days);
-
-    for (var i = 0; i < days.length; i++) {
-        if (!moment.isMoment(days[i])) { delete (days[i]); continue; }
-
-        if (adjust) {
-            if (days[i].day() === 0) { days[i] = days[i].add(1, 'day'); }
-            if (days[i].day() === 6) { days[i] = days[i].subtract(1, 'day'); }
-        }
-
-        days[i] = days[i].startOf('day');
-    }
-
-    if (!days.length) { return false; }
-    //for now, only return a moment object
-    return days[0]._d;
-    
-    //if (days.length === 1) { return days[0]; }
-
-    //return days;
+    return { month: M, date: D };
 }
