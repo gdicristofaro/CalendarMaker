@@ -572,21 +572,6 @@ const generateMonthCalendar = async (slide: any, options: PptxSettings, month: n
     }
 }
 
-// TODO remove
-// creates options to be used with PptxGenJS from settings
-// some further modifications that ar situationally dependent will still need to occur (i.e. border based on which end cell is on)
-// const generateOptions = (settings: PptxSettings): PptxSettings =>  {
-//     let toRet : any = {};
-
-//     toRet.headerOpts = $.extend(true, {font_size:HEADER_FONT_SIZE, font_face:settings.font}, settings.headerOptions);
-//     toRet.bodyOpts = $.extend(true, {font_face:settings.font, border: settings.calendarBorder}, settings.bodyOptions);
-//     toRet.emptyOpts = settings.emptyOptions;
-//     toRet.miniCalOpts = $.extend(true, {margin:0, font_size:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}, settings.miniCalOptions);
-//     
-//     toRet.titleTextOpts = $.extend({font_face:settings.font, align: 'left', font_size:TITLE_TEXT_SIZE}, settings.titleTextOptions)
-//     toRet.eventOpts = $.extend({font_size:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'c'}, settings.eventTextOptions);
-//     return toRet as PptxSettings;
-// }
 
 
 /**
@@ -607,6 +592,19 @@ const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => 
     });
 }
 
+const getExtendedSettings = (settings: PptxSettings): PptxSettings => {
+    return {
+        ...settings,
+        ...{
+            headerOptions: {...settings.headerOptions, ...{font_size:HEADER_FONT_SIZE, font_face:settings.font}},
+            bodyOptions: {...settings.bodyOptions, ...{font_face:settings.font, border: settings.calendarBorder}},
+            miniCalOptions: {...settings.miniCalOptions, ...{margin:0, font_size:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}},
+            titleTextOptions: {...settings.titleTextOptions, ...{font_face:settings.font, align: 'left', font_size:TITLE_TEXT_SIZE}},
+            eventTextOptions: {...settings.eventTextOptions, ...{font_size:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'c'}}
+        }
+    };
+}
+
 /**
  * Creates a powerpoint file for the calendar.
  * @param settings The powerpoint settings.
@@ -615,6 +613,7 @@ const convertDateEntries = (events: DateEntry[], year: number) : DateEntry[] => 
  * @param year The year.
  */
 export const create = async (settings: PptxSettings, events: DateEntry[], banners:string[], year: number) => {
+    let extendedSettings = getExtendedSettings(settings);
     let pptx = new pptxgen();
     pptx.layout = 'LAYOUT_4x3';
 
@@ -640,8 +639,8 @@ export const create = async (settings: PptxSettings, events: DateEntry[], banner
     for (let i = 0; i < 12; i++) {
         let slide = pptx.addSlide();
         let bannerToUse = (banners && banners.length > i) ? banners[i] : undefined;
-        await generateMonthCalendar(slide, settings, i, year, bannerToUse, dates[i]);
+        await generateMonthCalendar(slide, extendedSettings, i, year, bannerToUse, dates[i]);
     }
 
-    pptx.writeFile({ fileName: `${settings.pptxName}-${year.toString()}` }); 
+    pptx.writeFile({ fileName: `${extendedSettings.pptxName}-${year.toString()}` }); 
 }
