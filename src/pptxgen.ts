@@ -45,7 +45,7 @@ const EVENT_FONT_SIZE = 7;
 const EVENT_IMAGE_SPACING = .025;
 const CHARACTERS_PER_LINE = 20;
 
-const NO_BORDER = {pt: '0', color: '000000'};
+const NO_BORDER = null;
 
 const CAL_HEIGHTS = [
     CAL_HEADER_HEIGHT,
@@ -100,7 +100,7 @@ const getMiniHeaderArr = (miniCalHeaderOpts: CalOptions) => {
  *   bottomRightCells - same for bottom right
  *   rows - rows to be used with addTable
  */
-const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts: any, emptyborder: BorderOptions, defaultborder: BorderOptions) => {
+const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts: any, emptyborder: BorderOptions | null, defaultborder: BorderOptions | null) => {
     let date = new Date(year, month, 1);
 
     let monthDays = getDaysInMonth(date);
@@ -130,8 +130,8 @@ const generateDaysTable = (month: number, year: number, calOpts: any, emptyopts:
     // get to the end of the week
     while (arr.length % 7 !== 0) {
         let leftBorder = (curArrDay === 0) ? defaultborder : emptyborder;
-        let rightBorder : BorderOptions = (arr.length % 7 === 6) ? defaultborder : emptyborder;
-        let theseEmptyOpts = {...{border: [defaultborder, rightBorder, defaultborder, leftBorder]}, ...emptyopts};
+        let rightBorder: BorderOptions | null = (arr.length % 7 === 6) ? defaultborder : emptyborder;
+        let theseEmptyOpts: any = {...{border: [defaultborder, rightBorder, defaultborder, leftBorder]}, ...emptyopts};
         arr.push({text: '', options: theseEmptyOpts});
         bottomRightCells++;
     }
@@ -596,11 +596,11 @@ const getExtendedSettings = (settings: PptxSettings): PptxSettings => {
     return {
         ...settings,
         ...{
-            headerOptions: {...settings.headerOptions, ...{font_size:HEADER_FONT_SIZE, font_face:settings.font}},
+            headerOptions: {...settings.headerOptions, ...{fontSize:HEADER_FONT_SIZE, font_face:settings.font}},
             bodyOptions: {...settings.bodyOptions, ...{font_face:settings.font, border: settings.calendarBorder}},
-            miniCalOptions: {...settings.miniCalOptions, ...{margin:0, font_size:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}},
-            titleTextOptions: {...settings.titleTextOptions, ...{font_face:settings.font, align: 'left', font_size:TITLE_TEXT_SIZE}},
-            eventTextOptions: {...settings.eventTextOptions, ...{font_size:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'c'}}
+            miniCalOptions: {...settings.miniCalOptions, ...{margin:0, fontSize:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}},
+            titleTextOptions: {...settings.titleTextOptions, ...{font_face:settings.font, align: 'left', fontSize:TITLE_TEXT_SIZE}},
+            eventTextOptions: {...settings.eventTextOptions, ...{fontSize:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'center'}}
         }
     };
 }
