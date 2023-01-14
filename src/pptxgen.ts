@@ -19,6 +19,7 @@ const CAL_TEXT_X = .5;
 const CAL_TEXT_Y = 0;
 const CAL_TEXT_H = 1;
 const TITLE_TEXT_SIZE = 18;
+const DATE_NUMBER_FONT_SIZE = 14;
 
 // where the calendar starts (1")
 const CAL_Y = 1;
@@ -516,7 +517,8 @@ const addBanner = async (slide: any, imagepath: string | undefined) => {
  * @param imagepath The banner data url.
  * @param dates object mapping the day to the date entry for a holiday.
  */
-const generateMonthCalendar = async (slide: any, options: PptxSettings, month: number, year: number, imagepath: string | undefined, dates: {[day: number] : DateEntry[]}) => {
+const generateMonthCalendar = async (slide: any, options: PptxSettings, month: number, year: number, 
+        imagepath: string | undefined, dates: {[day: number] : DateEntry[]}) => {
 
     let date = new Date(year, month, 1);
 
@@ -596,11 +598,11 @@ const getExtendedSettings = (settings: PptxSettings): PptxSettings => {
     return {
         ...settings,
         ...{
-            headerOptions: {...settings.headerOptions, ...{fontSize:HEADER_FONT_SIZE, font_face:settings.font}},
-            bodyOptions: {...settings.bodyOptions, ...{font_face:settings.font, border: settings.calendarBorder}},
-            miniCalOptions: {...settings.miniCalOptions, ...{margin:0, fontSize:MINI_FONT_SIZE, font_face:settings.font, border: NO_BORDER}},
-            titleTextOptions: {...settings.titleTextOptions, ...{font_face:settings.font, align: 'left', fontSize:TITLE_TEXT_SIZE}},
-            eventTextOptions: {...settings.eventTextOptions, ...{fontSize:EVENT_FONT_SIZE, font_face:settings.font, valign: 'bottom', align: 'center'}}
+            headerOptions: {...settings.headerOptions, ...{fontSize:HEADER_FONT_SIZE, fontFace:settings.font}},
+            bodyOptions: {...settings.bodyOptions, ...{fontSize: DATE_NUMBER_FONT_SIZE, fontFace:settings.font, border: settings.calendarBorder}},
+            miniCalOptions: {...settings.miniCalOptions, ...{margin:0, fontSize:MINI_FONT_SIZE, fontFace:settings.font, border: NO_BORDER}},
+            titleTextOptions: {...settings.titleTextOptions, ...{fontFace:settings.font, align: 'left', fontSize:TITLE_TEXT_SIZE}},
+            eventTextOptions: {...settings.eventTextOptions, ...{fontSize:EVENT_FONT_SIZE, fontFace:settings.font, valign: 'bottom', align: 'center'}}
         }
     };
 }

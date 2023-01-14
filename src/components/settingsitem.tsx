@@ -217,7 +217,7 @@ const AllFormatSettings = (props: {
                     model.emptyOptions.fill, SettingsType.Color, "Color of Empty Table Cells")}
                 {getField((newColor) => updateField(["eventTextOptions", "color"], newColor),
                     model.eventTextOptions.color, SettingsType.Color, "Event Text Color", 
-                    "(i.e. the color of the text for 'Christmas Day')")}
+                    "i.e. the color of the text for 'Christmas Day'")}
             </Paper>
             <Paper style={paperStyle}>
                 <div style={{ margin: "10px 0px" }}>
