@@ -13,7 +13,13 @@ import { DateEntry, DateEventModel, DefaultSettings, MONTHS, SettingsModel } fro
 import Dialog from '@mui/material/Dialog';
 import React, { useContext, useState } from 'react';
 import { ModelContext } from '../modelcontext';
-import { Box, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Box, DialogActions, DialogContent, DialogContentText, DialogTitle, makeStyles } from '@mui/material';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ArticleIcon from '@mui/icons-material/Article';
+import EventIcon from '@mui/icons-material/Event';
+import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
+import PhotoIcon from '@mui/icons-material/Photo';
 
 
 interface TabPanelProps {
@@ -42,6 +48,19 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
+let TAB_HEIGHT = '40px';
+
+let TAB_STYLES = {
+  tabsRoot: {
+    minHeight: TAB_HEIGHT,
+    height: TAB_HEIGHT
+  },
+  tabRoot: {
+    minHeight: TAB_HEIGHT,
+    height: TAB_HEIGHT
+
+  }
+};
 
 const MainComponent = (props: {}) => {
 
@@ -129,16 +148,18 @@ const MainComponent = (props: {}) => {
     return (
         <div>
             <Button
-                variant="contained"
-                title='Load Settings'
+                variant='contained'
                 component='label'
+                startIcon={<FileUploadIcon />}
                 style={{ margin: 10 }}
             >
                 Load Settings
                 <input type="file" onChange={(e) => settingsLoad(e.target.files)} style={{ display: 'none' }} />
             </Button>
             <Button
-                variant="contained"
+                variant='contained'
+                component='label'
+                startIcon={<FileDownloadIcon />}
                 style={{ margin: 10 }}
                 onClick={(e) => download(JSON.stringify(context.settings), "settings.json", "application/json")}
             >
@@ -147,6 +168,7 @@ const MainComponent = (props: {}) => {
             <Button
                 variant="contained"
                 style={{ margin: 10 }}
+                startIcon={<ArticleIcon />}
                 onClick={pptxHandler}
             >
                 Create PowerPoint File
@@ -163,10 +185,10 @@ const MainComponent = (props: {}) => {
                 style={{ paddingLeft: '10px' }}
             />
             <Paper>
-                <Tabs value={tabIdx} onChange={(evt, newVal) => setTabIdx(newVal)}>
-                    <Tab label="Formatting Settings" value={0} />
-                    <Tab label="Events Settings" value={1} />
-                    <Tab label="Banners" value={2} />
+                <Tabs value={tabIdx} onChange={(evt, newVal) => setTabIdx(newVal)} style={TAB_STYLES.tabsRoot}>
+                    <Tab label="Formatting Settings" icon={<DisplaySettingsIcon />} iconPosition='start' value={0} style={TAB_STYLES.tabRoot}/>
+                    <Tab label="Events Settings" icon={<EventIcon />} iconPosition='start' value={1} style={TAB_STYLES.tabRoot}/>
+                    <Tab label="Banners" icon={<PhotoIcon />} iconPosition='start' value={2} style={TAB_STYLES.tabRoot}/>
                 </Tabs>
                 <TabPanel index={0} value={tabIdx}>
                     <AllFormatSettings model={formatSettings} onChange={(newSettings) => {

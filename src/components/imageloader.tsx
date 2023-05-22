@@ -52,6 +52,7 @@ const ImageLoader = (props: {
                     // iconStyle={{width: 32, height: 32}}
                     style={{ padding: 8}}
                     onClick={() => { props.onDataUrl(""); }}
+                    disabled={!props.initialDataUrl || props.initialDataUrl.length === 0}
                 >
                     <DeleteIcon />
                 </IconButton>
