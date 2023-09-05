@@ -8,7 +8,12 @@ import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDate
 import SmallLabel from './smalllabel';
 import { DateEventModel, DateTypeInfo, DAYS, MONTHS, WEEK_NUMBER } from '../model';
 import { Dayjs } from 'dayjs';
+import Paper from '@mui/material/Paper';
+import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, Typography } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
+
+const INPUT_COMP_STYLE = {margin: '0 .5rem'};
 
 /**
  * generates a date selector (i.e. January 10)
@@ -27,7 +32,7 @@ const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTyp
                     month: value.month() + 1,
                     dayNum: value.date()
                 })}
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
             />
         </div>
     );
@@ -45,8 +50,10 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
     return (
         <div>
             <div style={CELL_STYLE}>
-                <SmallLabel text="Month" />
                 <Select
+                    label="Month"
+                    title="Month"
+                    variant="standard"
                     value={month}
                     onChange={(evt) => onUpdate({
                         dateType: 'WeekdayMonth',
@@ -66,8 +73,9 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
                 </Select>
             </div>
             <div style={CELL_STYLE}>
-                <SmallLabel text="Day of the Week" />
                 <Select
+                    title="Day"
+                    variant="standard"
                     style={{ marginLeft: '-24px', marginTop: '-10px' }}
                     value={dayOfWeek}
                     onChange={(evt) => onUpdate({
@@ -87,8 +95,9 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
                 </Select>
             </div>
             <div style={CELL_STYLE}>
-                <SmallLabel text="Week Number of Month" />
                 <Select
+                    title="Week Number"
+                    variant='standard'
                     value={week}
                     onChange={(evt) => onUpdate({
                         dateType: 'WeekdayMonth',
@@ -130,12 +139,13 @@ const getWeekdayBeforeSelector = (month: number, date: number, dayOfWeek: number
                         date: value.date(),
                         dayOfWeek
                     })}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
                 />
             </div>
             <div style={CELL_STYLE}>
-                <SmallLabel text="Month" />
                 <Select
+                    title='Month'
+                    variant='standard'
                     value={dayOfWeek}
                     onChange={(evt) => onUpdate({
                         dateType: 'WeekdayBefore',
@@ -162,6 +172,7 @@ const getCustomSelector = (dateString: string, onUpdate: (updated: DateTypeInfo)
     return (
         <div style={CELL_STYLE}>
             <TextField
+                variant='standard'
                 value={dateString}
                 label="Custom Date"
                 onChange={(evt) => onUpdate({ dateType: 'Custom', identifier: evt.target.value })}
@@ -212,93 +223,98 @@ const DateEvent = (props: {
 
 
     return (
-        <div style={{ padding: '10px', margin: '10px' }}>
-            <div style={CELL_STYLE}>
-                <TextField
-                    // hintText="Name" 
-                    value={model.eventName}
-                    onChange={(evt) => {
-                        let value = evt.target.textContent || "";
-                        onUpdate({ ...model, ...{ eventName: value } });
-                    }}
-                    title="Event Name"
-                />
+        <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>{model.eventName}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+            <div style={{ display: 'flex' }}>
+                <div style={{flexGrow: 1}}>
+                    <div>
+                        <TextField
+                            variant='standard'
+                            value={model.eventName}
+                            onChange={(evt) => {
+                                let value = evt.target.value || "";
+                                onUpdate({ ...model, ...{ eventName: value } });
+                            }}
+                            title="Event Name"
+                            style={INPUT_COMP_STYLE}
+                        />
+
+                        <Select
+                            title="Date Type"
+                            variant='standard'
+                            value={model.dateInfo.dateType}
+                            onChange={(evt) => {
+                                let val = evt.target.value;
+                                switch (val) {
+                                    case "WeekdayMonth":
+                                        dateTypeInfoUpdate({
+                                            dateType: "WeekdayMonth",
+                                            dayOfWeek: 1,
+                                            month: 1, 
+                                            week: 1
+                                        })
+                                        break;
+                                    case "WeekdayBefore":
+                                        dateTypeInfoUpdate({
+                                            dateType: "WeekdayBefore",
+                                            date: 1,
+                                            dayOfWeek: 1, 
+                                            month: 1
+                                        });
+                                        break;
+                                    case "Custom":
+                                        dateTypeInfoUpdate({
+                                            dateType: 'Custom',
+                                            identifier: "Easter"
+                                        });
+                                        break;
+                                    case "Date":
+                                        dateTypeInfoUpdate({
+                                            dateType: "Date",
+                                            dayNum: 1,
+                                            month: 1
+                                        })
+                                        break;
+                                };
+                            }}
+                            autoWidth={true}
+                            style={INPUT_COMP_STYLE}
+                        >
+                            <MenuItem value="Date">Date</MenuItem>
+                            <MenuItem value="WeekdayMonth">Day of the Week for Week Number of Month</MenuItem>
+                            <MenuItem value="WeekdayBefore">Day of the Week Before Date</MenuItem>
+                            <MenuItem value="Custom">Custom Moment-Holiday Text</MenuItem>
+                        </Select>
+                    </div>
+                    <div>
+                        {dateTypeComponent}
+                    </div>
+                </div>
+                <div>
+                    <ImageLoader
+                        title="Choose Image..."
+                        initialDataUrl={props.model.imageDataUrl || ""}
+                        onDataUrl={(durl) => {
+                            onUpdate({ ...model, ...{ imageDataUrl: durl } });
+                        }}
+                    />
+                </div>
             </div>
-            <div style={{
-                ...CELL_STYLE, ...{
-                    width: '256px',
-                    position: 'relative'
-                }
-            }}
+            
+        
+
+            <IconButton
+                // iconStyle={{width: 48, height: 48}}
+                style={{ width: 96, height: 96, padding: 20 }}
+                onClick={() => onDelete()}
             >
-                <SmallLabel text="Date Type" />
-                <Select
-                    value={model.dateInfo.dateType}
-                    onChange={(evt) => {
-                        let val = evt.target.value;
-                        switch (val) {
-                            case "WeekdayMonth":
-                                dateTypeInfoUpdate({
-                                    dateType: "WeekdayMonth",
-                                    dayOfWeek: 1,
-                                    month: 1, 
-                                    week: 1
-                                })
-                                break;
-                            case "WeekdayBefore":
-                                dateTypeInfoUpdate({
-                                    dateType: "WeekdayBefore",
-                                    date: 1,
-                                    dayOfWeek: 1, 
-                                    month: 1
-                                });
-                                break;
-                            case "Custom":
-                                dateTypeInfoUpdate({
-                                    dateType: 'Custom',
-                                    identifier: "Easter"
-                                });
-                                break;
-                            case "Date":
-                                dateTypeInfoUpdate({
-                                    dateType: "Date",
-                                    dayNum: 1,
-                                    month: 1
-                                })
-                                break;
-                        };
-                    }}
-                    autoWidth={true}
-                >
-                    <MenuItem value="Date">Date</MenuItem>
-                    <MenuItem value="WeekdayMonth">Day of the Week for Week Number of Month</MenuItem>
-                    <MenuItem value="WeekdayBefore">Day of the Week Before Date</MenuItem>
-                    <MenuItem value="Custom">Custom Moment-Holiday Text</MenuItem>
-                </Select>
-            </div>
-            <div style={CELL_STYLE}>
-                {dateTypeComponent}
-            </div>
-            <div style={CELL_STYLE}>
-                <ImageLoader
-                    title="Choose Image..."
-                    initialDataUrl={props.model.imageDataUrl || ""}
-                    onDataUrl={(durl) => {
-                        onUpdate({ ...model, ...{ imageDataUrl: durl } });
-                    }}
-                />
-            </div>
-            <div style={CELL_STYLE}>
-                <IconButton
-                    // iconStyle={{width: 48, height: 48}}
-                    style={{ width: 96, height: 96, padding: 20 }}
-                    onClick={() => onDelete()}
-                >
-                    <DeleteIcon />
-                </IconButton>
-            </div>
-        </div>
-    );
+            <DeleteIcon />
+            </IconButton>
+        </AccordionDetails>
+    </Accordion>);
 };
 
 export default DateEvent;
