@@ -6,9 +6,9 @@ import ImageLoader from './imageloader';
 import Checkbox from '@mui/material/Checkbox';
 import ColorPicker from './colorpicker';
 import Paper from '@mui/material/Paper';
-import SmallLabel from './smalllabel';
 import { useState } from 'react';
 import { PptxSettings } from '../model';
+import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 
 export enum VerticalAlign {
     top = "top",
@@ -49,8 +49,8 @@ const SettingsItem = (props: {
         case SettingsType.Boolean:
             baseComponent = (
                 <div>
-                    <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
                     <Checkbox
+                        title={props.title + (props.hint ? (" (" + props.hint + ")") : "")}
                         checked={value}
                         onChange={(evt, checked) => {
                             props.setter(checked);
@@ -80,9 +80,11 @@ const SettingsItem = (props: {
 
             baseComponent = (
                 <div>
-                    <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
                     <Select
                         // style={{ marginLeft: '-24px', marginTop: '-10px' }}
+                        variant="standard"
+                        label={props.title + (props.hint ? (" (" + props.hint + ")") : "")}
+                        title={props.title + (props.hint ? (" (" + props.hint + ")") : "")}
                         value={value}
                         onChange={evt => {
                             props.setter(evt.target.value);
@@ -98,8 +100,8 @@ const SettingsItem = (props: {
         case SettingsType.Color:
             baseComponent = (
                 <div>
-                    <SmallLabel text={props.title + (props.hint ? (" (" + props.hint + ")") : "")} />
                     <ColorPicker
+                        title={props.title + (props.hint ? (" (" + props.hint + ")") : "")}
                         initialColor={value}
                         onUpdate={(v) => {
                             props.setter(v);
@@ -129,9 +131,11 @@ const SettingsItem = (props: {
             let textFieldType = props.type === SettingsType.Number ? "number" : undefined;
 
             baseComponent = (<TextField
+                variant='standard'
                 type={textFieldType}
                 value={value}
                 title={props.title}
+                label={props.title}
                 onChange={(e) => {
                     props.setter(e.target.value);
                     setValue(e.target.value);
@@ -148,6 +152,32 @@ const SettingsItem = (props: {
 }
 
 
+const SettingsCard = (props: {
+    title: string,
+    subtitle?: string,
+    children?: any,
+    [key: string]: any
+}) => {
+    let { title, subtitle, children, ...rest } = props;
+
+    return (
+        // <Card sx={{ maxWidth: 345 }}>
+        <Card {...{...{style: {margin: ".5rem"}}, ...rest}}>
+            <CardContent>
+                <Typography gutterBottom variant="h5" component="div">
+                    {title}
+                </Typography>
+                {subtitle &&
+                    <Typography gutterBottom variant="body2" component="div" style={{ fontStyle: "italic" }} color="text.secondary">
+                        {subtitle}
+                    </Typography>}
+                <div>
+                    {children}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
 
 
 
@@ -165,7 +195,7 @@ const AllFormatSettings = (props: {
             let field = ancestorFields[i];
             currParent = currParent[field];
         }
-        
+
         currParent[ancestorFields[ancestorFields.length - 1]] = value;
         onChange(copiedModel);
     }
@@ -204,88 +234,77 @@ const AllFormatSettings = (props: {
     };
 
     return (
-        <div>
-            <Paper style={paperStyle}>
-                <div style={{ margin: "10px 0px" }}>
-                    <h2 style={{ margin: 0 }}>General</h2>
-                </div>
-                {getField((newName) => updateField(["pptxName"], newName),
-                    model.pptxName, SettingsType.Text, "PowerPoint File Name")}
-                {getField((newFont) => updateField(["font"], newFont),
-                    model.font, SettingsType.Text, "Font Type", "Power Point Font Type")}
-                {getField((newFill) => updateField(["emptyOptions", "fill"] , newFill),
-                    model.emptyOptions.fill, SettingsType.Color, "Color of Empty Table Cells")}
-                {getField((newColor) => updateField(["eventTextOptions", "color"], newColor),
-                    model.eventTextOptions.color, SettingsType.Color, "Event Text Color", 
-                    "i.e. the color of the text for 'Christmas Day'")}
-            </Paper>
-            <Paper style={paperStyle}>
-                <div style={{ margin: "10px 0px" }}>
-                    <h2 style={{ margin: 0 }}>Calendar Border</h2>
-                </div>
-                {getPt((newPt) => updateField(["calendarBorder", "pt"], newPt), 
-                    model.calendarBorder.pt, "Width", "in points")}
-                {getField((newColor) => updateField(["calendarBorder", "color"], newColor),
-                    model.calendarBorder.color, SettingsType.Color, "Color")}
-            </Paper>
-            <Paper style={paperStyle}>
-                <div style={{ margin: "10px 0px" }}>
-                    <h2 style={{ margin: 0 }}>Calendar Header</h2>
-                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. Sunday, Monday, Tuesday)</span>
-                </div>
-                {getField((newVal) => updateField(["headerOptions", "valign"], newVal), 
-                    model.headerOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment")}
-                {getField((newVal) => updateField(["headerOptions", "align"], newVal),
-                    model.headerOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
-                {getField((newVal) => updateField(["headerOptions", "fill"], newVal),
-                    model.headerOptions.fill, SettingsType.Color, "Background Color")}
-                {getField((newVal) => updateField(["headerOptions", "color"], newVal), 
-                    model.headerOptions.color, SettingsType.Color, "Text Color")}
-            </Paper>
-            <Paper style={paperStyle}>
-                <div style={{ margin: "10px 0px" }}>
-                    <h2 style={{ margin: 0 }}>Calendar Number</h2>
-                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. the "21" for the date in a box)</span>
-                </div>
-                {getField((newVal) => updateField(["bodyOptions", "align"], newVal),
-                    model.bodyOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
-                {getField((newVal) => updateField(["bodyOptions", "color"], newVal), 
-                    model.bodyOptions.color, SettingsType.Color, "Color")}
-                {getField((newVal) => updateField(["bodyOptions", "fill"], newVal), 
-                    model.bodyOptions.fill, SettingsType.Color, "Fill")}
-                {getField((newVal) => updateField(["bodyOptions", "italic"], newVal),
-                    model.bodyOptions.italic, SettingsType.Boolean, "Italicize Text")}
-            </Paper>
-            <Paper style={paperStyle}>
-                <div style={{ margin: "10px 0px" }}>
-                    <h2 style={{ margin: 0 }}>Miniature Calendar Options</h2>
-                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. if the month is February, the smaller calendar for March)</span>
-                </div>
-                {getField((newVal) => updateField(["miniCalOptions", "valign"], newVal),
-                    model.miniCalOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
-                {getField((newVal) => updateField(["miniCalOptions", "align"], newVal), 
-                    model.miniCalOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment in EmptySpace")}
-                {getField((newVal) => updateField(["miniCalOptions", "color"], newVal),
-                    model.miniCalOptions.color, SettingsType.Color, "Color")}
-                {getField((newVal) => updateField(["miniCalOptions", "fill"], newVal),
-                    model.miniCalOptions.fill, SettingsType.Color, "Fill")}
-                {getPt((newVal) => updateField(["miniCalUnderlineColor", "pt"], newVal),
-                    model.miniCalUnderlineColor.pt, "Header Border Width", "the seperator between the header items like 'M', 'T', etc. in points")}
-                {getField((newVal) => updateField(["miniCalUnderlineColor", "color"], newVal),
-                    model.miniCalUnderlineColor.color, SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
-            </Paper>
-
-            <Paper style={paperStyle}>
-                <div style={{ margin: "10px 0px" }}>
-                    <h2 style={{ margin: 0 }}>Calendar Title Text</h2>
-                    <span style={{ fontFamily: 'Roboto, sans-serif', fontStyle: 'italic' }}>(i.e. like 'January')</span>
-                </div>
-                {getField((newVal) => updateField(["titleTextOptions", "valign"], newVal),
-                    model.titleTextOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
-                {getField((newVal) => updateField(["titleTextOptions", "color"], newVal),
-                    model.titleTextOptions.color, SettingsType.Color, "Color")}
-            </Paper>
-        </div>
+        <Grid container spacing={3}>
+            <Grid sm={12} md={6} lg={4}>
+                <SettingsCard title="General">
+                    {getField((newName) => updateField(["pptxName"], newName),
+                        model.pptxName, SettingsType.Text, "PowerPoint File Name")}
+                    {getField((newFont) => updateField(["font"], newFont),
+                        model.font, SettingsType.Text, "Font Type", "Power Point Font Type")}
+                    {getField((newFill) => updateField(["emptyOptions", "fill"], newFill),
+                        model.emptyOptions.fill, SettingsType.Color, "Color of Empty Table Cells")}
+                    {getField((newColor) => updateField(["eventTextOptions", "color"], newColor),
+                        model.eventTextOptions.color, SettingsType.Color, "Event Text Color",
+                        "i.e. the color of the text for 'Christmas Day'")}
+                </SettingsCard>
+            </Grid>
+            <Grid sm={12} md={6} lg={4}>
+                <SettingsCard title="Calendar Border">
+                    {getPt((newPt) => updateField(["calendarBorder", "pt"], newPt),
+                        model.calendarBorder.pt, "Width", "in points")}
+                    {getField((newColor) => updateField(["calendarBorder", "color"], newColor),
+                        model.calendarBorder.color, SettingsType.Color, "Color")}
+                </SettingsCard>
+            </Grid>
+            <Grid sm={12} md={6} lg={4}>
+                <SettingsCard title="Calendar Header" subtitle="(i.e. Sunday, Monday, Tuesday)">
+                    {getField((newVal) => updateField(["headerOptions", "valign"], newVal),
+                        model.headerOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment")}
+                    {getField((newVal) => updateField(["headerOptions", "align"], newVal),
+                        model.headerOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
+                    {getField((newVal) => updateField(["headerOptions", "fill"], newVal),
+                        model.headerOptions.fill, SettingsType.Color, "Background Color")}
+                    {getField((newVal) => updateField(["headerOptions", "color"], newVal),
+                        model.headerOptions.color, SettingsType.Color, "Text Color")}
+                </SettingsCard>
+            </Grid>
+            <Grid sm={12} md={6} lg={4}>
+                <SettingsCard title="Calendar Number" subtitle="(i.e. the '21' for the date in a box)">
+                    {getField((newVal) => updateField(["bodyOptions", "align"], newVal),
+                        model.bodyOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
+                    {getField((newVal) => updateField(["bodyOptions", "color"], newVal),
+                        model.bodyOptions.color, SettingsType.Color, "Color")}
+                    {getField((newVal) => updateField(["bodyOptions", "fill"], newVal),
+                        model.bodyOptions.fill, SettingsType.Color, "Fill")}
+                    {getField((newVal) => updateField(["bodyOptions", "italic"], newVal),
+                        model.bodyOptions.italic, SettingsType.Boolean, "Italicize Text")}
+                </SettingsCard>
+            </Grid>
+            <Grid sm={12} md={6} lg={4}>
+                <SettingsCard title="Miniature Calendar Options" subtitle="(i.e. if the month is February, the smaller calendar for March)">
+                    {getField((newVal) => updateField(["miniCalOptions", "valign"], newVal),
+                        model.miniCalOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
+                    {getField((newVal) => updateField(["miniCalOptions", "align"], newVal),
+                        model.miniCalOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment in EmptySpace")}
+                    {getField((newVal) => updateField(["miniCalOptions", "color"], newVal),
+                        model.miniCalOptions.color, SettingsType.Color, "Color")}
+                    {getField((newVal) => updateField(["miniCalOptions", "fill"], newVal),
+                        model.miniCalOptions.fill, SettingsType.Color, "Fill")}
+                    {getPt((newVal) => updateField(["miniCalUnderlineColor", "pt"], newVal),
+                        model.miniCalUnderlineColor.pt, "Header Border Width", "the seperator between the header items like 'M', 'T', etc. in points")}
+                    {getField((newVal) => updateField(["miniCalUnderlineColor", "color"], newVal),
+                        model.miniCalUnderlineColor.color, SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
+                </SettingsCard>
+            </Grid>
+            <Grid sm={12} md={6} lg={4}>
+                <SettingsCard title="Calendar Title Text" subtitle="(i.e. like 'January')">
+                    {getField((newVal) => updateField(["titleTextOptions", "valign"], newVal),
+                        model.titleTextOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
+                    {getField((newVal) => updateField(["titleTextOptions", "color"], newVal),
+                        model.titleTextOptions.color, SettingsType.Color, "Color")}
+                </SettingsCard>
+            </Grid>
+        </Grid>
     );
 }
 

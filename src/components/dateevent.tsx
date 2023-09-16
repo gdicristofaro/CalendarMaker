@@ -5,7 +5,6 @@ import ImageLoader from './imageloader';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import SmallLabel from './smalllabel';
 import { DateEventModel, DateTypeInfo, DAYS, MONTHS, WEEK_NUMBER } from '../model';
 import { Dayjs } from 'dayjs';
 import Paper from '@mui/material/Paper';
@@ -238,12 +237,14 @@ const DateEvent = (props: {
                                 let value = evt.target.value || "";
                                 onUpdate({ ...model, ...{ eventName: value } });
                             }}
+                            label="Event Name"
                             title="Event Name"
                             style={INPUT_COMP_STYLE}
                         />
 
                         <Select
                             title="Date Type"
+                            label="Date Type"
                             variant='standard'
                             value={model.dateInfo.dateType}
                             onChange={(evt) => {

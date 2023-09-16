@@ -174,7 +174,9 @@ const MainComponent = (props: {}) => {
                 Create PowerPoint File
             </Button>
             <TextField
+                variant='standard'
                 title="Year for Calendar"
+                label="Year for Calendar"
                 type="number"
                 onChange={(e) => {
                     let copiedSettings: SettingsModel = structuredClone(context.settings);
