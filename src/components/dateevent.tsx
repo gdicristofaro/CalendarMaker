@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { DateEventModel, DateTypeInfo, DAYS, MONTHS, WEEK_NUMBER } from '../model';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import Paper from '@mui/material/Paper';
 import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -22,16 +22,16 @@ const INPUT_COMP_STYLE = {margin: '0 .5rem'};
  */
 const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
-        <div style={CELL_STYLE}>
+        <div style={{...CELL_STYLE, ...{marginTop: '30px'}}}>
             <DatePicker
                 label="Date for Event"
-                value={new Date(new Date().getFullYear(), month - 1, day)}
+                value={dayjs(new Date(new Date().getFullYear(), month - 1, day))}
                 onChange={(value: Dayjs | null) => value && onUpdate({
                     dateType: "Date",
                     month: value.month() + 1,
                     dayNum: value.date()
                 })}
-                renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
+                // renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
             />
         </div>
     );
@@ -131,14 +131,14 @@ const getWeekdayBeforeSelector = (month: number, date: number, dayOfWeek: number
             <div style={CELL_STYLE}>
                 <DatePicker
                     label="Select Date For Event"
-                    value={new Date(new Date().getFullYear(), month - 1, date)}
+                    value={dayjs(new Date(new Date().getFullYear(), month - 1, date))}
                     onChange={(value: Dayjs | null) => value && onUpdate({
                         dateType: 'WeekdayBefore',
                         month: value.month() + 1,
                         date: value.date(),
                         dayOfWeek
                     })}
-                    renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
+                    // renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
                 />
             </div>
             <div style={CELL_STYLE}>

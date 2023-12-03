@@ -10,7 +10,6 @@
     "@mui/material": "^5.13.1",
     "@mui/x-date-pickers": "^6.5.0",
     "@ungap/structured-clone": "^1.2.0",
-    "antd": "^5.11.2",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.7",
     "downloadjs": "^1.4.7",
@@ -22,7 +21,7 @@
     "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "typescript": "^5.0.4",
     "web-vitals": "^3.3.1"
   },
