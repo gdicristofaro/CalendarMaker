@@ -6,31 +6,129 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/system';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Dialog, DialogTitle, Typography } from '@mui/material';
+import { CSSProperties, useState } from 'react';
 
+const COMPONENT_SIZE = '210px';
+const BUTTON_SIZE = '70px';
+const PAPER_MARGIN = '5px';
 
-const HoverOverlay = styled('div')({
-    position: 'absolute', 
-    top: 0, 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    color: 'white',
-    backgroundColor: 'rgba(0,0,0,0)',
-    zIndex: 9999999,
-    transition: "background-color 0.5s",
-    "&:hover": { 
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        transition: "background-color 0.5s"
+const STYLES: { [key: string]: CSSProperties } = {
+    mainPaper: {
+        margin: PAPER_MARGIN
+    },
+    mainContainer: { 
+        width: COMPONENT_SIZE, 
+        height: COMPONENT_SIZE, 
+        position: 'relative' 
+    },
+    addImageButton: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0
+    },
+    addImageTextContainer: {
+        position: 'relative',
+        textAlign: 'center'
+    },
+    addImageIcon: {
+        display: 'block',
+        width: BUTTON_SIZE,
+        height: BUTTON_SIZE
+    },
+    imageOverlayContainer: {
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        boxSizing: 'border-box'
+    },
+    imageContainer: {
+        position: 'relative',
+        height: '100%',
+        width: '100%',
+        borderRadius: '4px',
+    },
+    image: {
+        maxWidth: '100%',
+        maxHeight: '100%',
+        transform: 'translate(-50%, -50%)',
+        position: 'relative',
+        left: '50%',
+        top: '50%'
+    },
+    hoverOverlay: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        color: 'white',
+        backgroundColor: 'rgba(0,0,0,0)',
+        zIndex: 1,
+        opacity: 0,
+        transition: "background-color 0.5s, opacity 0.5s",
+        "&:hover": {
+            opacity: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            transition: "background-color 0.5s, opacity 0.5s"
+        }
+    } as any,
+    imageButtonsContainer: {
+        position: 'relative',
+        color: 'white',
+        opacity: 1,
+        minHeight: 0,
+        margin: '35% 25%',
+        display: 'flex',
+        height: '30%',
+        width: '50%'
+    },
+    imageButton: {
+        flex: 1,
+        color: 'white',
+        transition: 'color 0.2s',
+        "&:active": {
+            color: '#ddd',
+            transition: 'color 0.2s'
+        }
+    } as any,
+    imageButtonIcon: { 
+        width: '100%', 
+        height: '100%'
+    },
+    lightboxContainer: {
+        overflow: 'hidden',
+        "& div": {
+            overflow: 'hidden'
+        }
+    } as any,
+    lightboxImageContainer: {
+        width: "100%",
+        height: "100%",
+        padding: '10px',
+        boxSizing: 'border-box',
+    },
+    lightboxImage: {
+        maxWidth: "80vw",
+        maxHeight: "70vh",
     }
-  });
+
+}
+
+const HoverOverlay = styled('div')(STYLES.hoverOverlay as any);
 
 // 'HelloProps' describes the shape of props.
 // State is never set so we use the 'undefined' type.
 const ImageLoader = (props: {
     onDataUrl: (url: string) => void,
     initialDataUrl: string,
-    title: string
+    title?: string,
+    lightboxTitle?: string
 }) => {
+    let [lightboxOpen, setLightboxOpen] = useState(false);
+
     let handleFileSelected = (selectorFiles: FileList) => {
         if (!selectorFiles || selectorFiles.length <= 0)
             return;
@@ -51,109 +149,71 @@ const ImageLoader = (props: {
     let displayedComp;
     if (hasImg) {
         displayedComp = (
-        <div style={{
-            width: '100%', 
-            height: '100%', 
-            overflow: 'hidden', 
-            padding: '7px', 
-            boxSizing: 'border-box'
-            }}>
-            <div style={{
-                position: 'relative', 
-                height: '100%', 
-                width: '100%', 
-                boxSizing: 'border-box', 
-                borderRadius: '4px', 
-                overflow: 'hidden'
-                }}>
-                <img 
-                    src={props.initialDataUrl} 
-                    alt="Selected File"
-                    style={{ 
-                        width: '100%', 
-                        height: '100%'
-                     }}
-                    className="boxshadowed marginv20"
-                />
-                <HoverOverlay>
-                    {/* <div style={{opacity: 1, color: 'white'}}>Test</div> */}
-                    <div style={{
-                        color: 'white',
-                        opacity: 1,
-                        maxWidth: '60%',
-                        display: 'flex'
-                    }}>
-                        <IconButton sx={{ flex: 1 }} color="primary">
-                            <VisibilityIcon />
-                        </IconButton>
-                        <IconButton sx={{ flex: 1 }}>
-                            <DeleteIcon sx={{color: 'white'}} />
-                        </IconButton>
-                    </div>    
-                </HoverOverlay>
+            <div style={STYLES.imageOverlayContainer}>
+                <div style={STYLES.imageContainer}>
+                    <img
+                        src={props.initialDataUrl}
+                        alt="Selected File"
+                        style={STYLES.image}
+                    />
+                    <HoverOverlay>
+                        <div style={STYLES.imageButtonsContainer}>
+                            <Dialog sx={STYLES.lightboxDialog}
+                                onClose={() => setLightboxOpen(false)}
+                                open={lightboxOpen}>
+                                <DialogTitle>{props.lightboxTitle || props.title}</DialogTitle>
+                                <div style={STYLES.lightboxImageContainer}>
+                                    <img
+                                        src={props.initialDataUrl}
+                                        alt="Selected File"
+                                        style={STYLES.lightboxImage}
+                                    />
+                                </div>
+                            </Dialog>
+                            <IconButton sx={STYLES.imageButton}
+                                size='small'
+                                onClick={() => setLightboxOpen(true)}
+                                disableRipple>
+                                <VisibilityIcon style={STYLES.imageButtonIcon} />
+                            </IconButton>
+                            <IconButton sx={STYLES.imageButton}
+                                size='small'
+                                onClick={() => props.onDataUrl('')}
+                                disableRipple>
+                                <DeleteIcon style={STYLES.imageButtonIcon} />
+                            </IconButton>
+                        </div>
+                    </HoverOverlay>
+                </div>
             </div>
-        </div>
         )
     } else {
         displayedComp = (
             <Button
-            style={{ 
-                position: 'absolute', 
-                top: 0, 
-                bottom: 0, 
-                left: 0, 
-                right: 0 
-            }}
-            component='label'
-        >
-            <div style={{ 
-                position: 'relative', 
-                textAlign: 'center' 
-                }}>
-                    <AddIcon style={{ 
-                        display: 'block', 
-                        width: '70px', 
-                        height: '70px' 
-                        }} />
+                style={STYLES.addImageButton}
+                component='label'
+            >
+                <div style={STYLES.addImageTextContainer}>
+                    <AddIcon style={STYLES.addImageIcon} />
                     Add
-            </div>
+                </div>
 
-            <input type="file" onChange={(e) => handleFileSelected(e.target.files as FileList)} style={{ display: 'none' }} />
-        </Button>
+                <input 
+                    type="file" 
+                    onChange={(e) => handleFileSelected(e.target.files as FileList)} 
+                    style={{ display: 'none' }} 
+                />
+            </Button>
         );
     }
 
     return (
-        // <Paper style={{padding: 10, display: 'inline-block'}}>
-
-
-        // <div style={{marginRight: 10, display: 'inline-block'}}>
-        //     <Button
-        //         style={{margin: 5}}
-        //         component='label'
-        //     >
-        //         {props.title}
-        //         <input type="file" onChange={ (e) => handleChange(e.target.files as FileList)} style={{display: 'none'}}/>
-        //     </Button>
-        // </div>
-        // <div style={{ display: 'inline-block'}}>
-        //     <IconButton
-        //         // iconStyle={{width: 32, height: 32}}
-        //         style={{ padding: 8}}
-        //         onClick={() => { props.onDataUrl(""); }}
-        //         disabled={!props.initialDataUrl || props.initialDataUrl.length === 0}
-        //     >
-        //         <DeleteIcon />
-        //     </IconButton>
-        // </div>
-
-
-        <Paper style={{ margin: 5 }}>
-            <div style={{ width: '210px', height: '210px', position: 'relative' }}>
+        <Paper style={STYLES.mainPaper}>
+            {/* {props.title && (<Typography variant="body1" component="p">{props.title}</Typography>)} */}
+            <div style={STYLES.mainContainer}>
                 {displayedComp}
             </div>
         </Paper>
-        // </Paper>
     );
 }
 
