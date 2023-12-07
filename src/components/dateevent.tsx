@@ -10,6 +10,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import Paper from '@mui/material/Paper';
 import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SmallSelect from './smallselect';
 
 
 const INPUT_COMP_STYLE = {margin: '0 .5rem'};
@@ -24,6 +25,11 @@ const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTyp
     return (
         <div style={{...CELL_STYLE, ...{marginTop: '30px'}}}>
             <DatePicker
+                sx={{
+                    "& > div": {
+                        height: '45px'
+                    }
+                }}
                 label="Date for Event"
                 value={dayjs(new Date(new Date().getFullYear(), month - 1, day))}
                 onChange={(value: Dayjs | null) => value && onUpdate({
@@ -40,19 +46,21 @@ const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTyp
 
 /**
  * generates a weekday of week of month selector (i.e. 3rd Sunday of May)
+ * @param id the base id
  * @param month the month (1 is January)
  * @param week the week number (1 is 1st week)
  * @param dayOfWeek the day of the week (0 is Sunday)
  * @param onUpdate When info is updated
  */
-const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number, onUpdate: (dateItem: DateTypeInfo) => void) => {
+const getWeekdayMonthSelector = (id: string, month: number, week: number, dayOfWeek: number, onUpdate: (dateItem: DateTypeInfo) => void) => {
     return (
         <div>
             <div style={CELL_STYLE}>
-                <Select
+                <SmallSelect
                     label="Month"
                     title="Month"
-                    variant="standard"
+                    variant="outlined"
+                    id={id}
                     value={month}
                     onChange={(evt) => onUpdate({
                         dateType: 'WeekdayMonth',
@@ -69,12 +77,13 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
                             </MenuItem>
                         )
                     })}
-                </Select>
+                </SmallSelect>
             </div>
             <div style={CELL_STYLE}>
-                <Select
+                <SmallSelect
                     title="Day"
-                    variant="standard"
+                    variant="outlined"
+                    id={id + "_day_selector"}
                     style={{ marginLeft: '-24px', marginTop: '-10px' }}
                     value={dayOfWeek}
                     onChange={(evt) => onUpdate({
@@ -91,12 +100,13 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
                             </MenuItem>
                         )
                     })}
-                </Select>
+                </SmallSelect>
             </div>
             <div style={CELL_STYLE}>
-                <Select
+                <SmallSelect
                     title="Week Number"
-                    variant='standard'
+                    variant='outlined'
+                    id={id + "week_number_selector"}
                     value={week}
                     onChange={(evt) => onUpdate({
                         dateType: 'WeekdayMonth',
@@ -112,7 +122,7 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
                             </MenuItem>
                         )
                     })}
-                </Select>
+                </SmallSelect>
             </div>
         </div>
     );
@@ -120,12 +130,13 @@ const getWeekdayMonthSelector = (month: number, week: number, dayOfWeek: number,
 
 /**
  * the day of the week before a certain day (i.e. Sunday before July 3rd)
+ * @param id the base id for the component
  * @param month the month (1 is January)
  * @param date the day of the month
  * @param dayOfWeek the day of the week (0 is Sunday)
  * @param onUpdate When info is updated
  */
-const getWeekdayBeforeSelector = (month: number, date: number, dayOfWeek: number, onUpdate: (updated: DateTypeInfo) => void) => {
+const getWeekdayBeforeSelector = (id: string, month: number, date: number, dayOfWeek: number, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
         <div>
             <div style={CELL_STYLE}>
@@ -142,9 +153,10 @@ const getWeekdayBeforeSelector = (month: number, date: number, dayOfWeek: number
                 />
             </div>
             <div style={CELL_STYLE}>
-                <Select
+                <SmallSelect
+                    id={id + "_month"}
                     title='Month'
-                    variant='standard'
+                    variant='outlined'
                     value={dayOfWeek}
                     onChange={(evt) => onUpdate({
                         dateType: 'WeekdayBefore',
@@ -160,7 +172,7 @@ const getWeekdayBeforeSelector = (month: number, date: number, dayOfWeek: number
                             </MenuItem>
                         )
                     })}
-                </Select>
+                </SmallSelect>
             </div>
         </div>
     );
@@ -171,7 +183,8 @@ const getCustomSelector = (dateString: string, onUpdate: (updated: DateTypeInfo)
     return (
         <div style={CELL_STYLE}>
             <TextField
-                variant='standard'
+                variant='outlined'
+                size='small'
                 value={dateString}
                 label="Custom Date"
                 onChange={(evt) => onUpdate({ dateType: 'Custom', identifier: evt.target.value })}
@@ -190,14 +203,14 @@ const CELL_STYLE = {
 };
 
 
-const getDateTypeComponent = (dateInfo: DateTypeInfo, onUpdate: (updated: DateTypeInfo) => void) => {
+const getDateTypeComponent = (id: string, dateInfo: DateTypeInfo, onUpdate: (updated: DateTypeInfo) => void) => {
     switch (dateInfo.dateType) {
         case 'Date':
             return getDateSelector(dateInfo.month, dateInfo.dayNum, onUpdate);
         case 'WeekdayMonth':
-            return getWeekdayMonthSelector(dateInfo.month, dateInfo.week, dateInfo.dayOfWeek, onUpdate);
+            return getWeekdayMonthSelector(id , dateInfo.month, dateInfo.week, dateInfo.dayOfWeek, onUpdate);
         case 'WeekdayBefore':
-            return getWeekdayMonthSelector(dateInfo.month, dateInfo.date, dateInfo.dayOfWeek, onUpdate);
+            return getWeekdayMonthSelector(id, dateInfo.month, dateInfo.date, dateInfo.dayOfWeek, onUpdate);
         case 'Custom':
             return getCustomSelector(dateInfo.identifier, onUpdate);
     }
@@ -205,17 +218,19 @@ const getDateTypeComponent = (dateInfo: DateTypeInfo, onUpdate: (updated: DateTy
 
 // defines a calendar event
 const DateEvent = (props: {
+    id: string,
     onDelete: () => void,
     model: DateEventModel,
     onUpdate: (updated: DateEventModel) => void
 }) => {
-    let { model, onUpdate, onDelete } = props;
+    let { model, onUpdate, onDelete, id } = props;
 
     let dateTypeInfoUpdate = (updatedDateInfo: DateTypeInfo) => {
         onUpdate({ ...model, dateInfo: updatedDateInfo });
     };
 
     let dateTypeComponent = getDateTypeComponent(
+        id,
         model.dateInfo,
         dateTypeInfoUpdate
     );
@@ -231,7 +246,8 @@ const DateEvent = (props: {
                 <div style={{flexGrow: 1}}>
                     <div>
                         <TextField
-                            variant='standard'
+                            size='small'
+                            variant='outlined'
                             value={model.eventName}
                             onChange={(evt) => {
                                 let value = evt.target.value || "";
@@ -242,10 +258,11 @@ const DateEvent = (props: {
                             style={INPUT_COMP_STYLE}
                         />
 
-                        <Select
+                        <SmallSelect
+                            id={id + "_dateType"}
                             title="Date Type"
                             label="Date Type"
-                            variant='standard'
+                            variant='outlined'
                             value={model.dateInfo.dateType}
                             onChange={(evt) => {
                                 let val = evt.target.value;
@@ -288,7 +305,7 @@ const DateEvent = (props: {
                             <MenuItem value="WeekdayMonth">Day of the Week for Week Number of Month</MenuItem>
                             <MenuItem value="WeekdayBefore">Day of the Week Before Date</MenuItem>
                             <MenuItem value="Custom">Custom Moment-Holiday Text</MenuItem>
-                        </Select>
+                        </SmallSelect>
                     </div>
                     <div>
                         {dateTypeComponent}

@@ -208,12 +208,15 @@ const ImageLoader = (props: {
     }
 
     return (
+        <>
+        
+        {props.title && (<Typography variant="body1" component="p">{props.title}</Typography>)}
         <Paper style={STYLES.mainPaper}>
-            {/* {props.title && (<Typography variant="body1" component="p">{props.title}</Typography>)} */}
             <div style={STYLES.mainContainer}>
                 {displayedComp}
             </div>
         </Paper>
+        </>
     );
 }
 

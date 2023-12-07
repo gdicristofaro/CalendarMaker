@@ -9,6 +9,7 @@ import Paper from '@mui/material/Paper';
 import { useState } from 'react';
 import { PptxSettings } from '../model';
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import SmallSelect from './smallselect';
 
 export enum VerticalAlign {
     top = "top",
@@ -80,9 +81,10 @@ const SettingsItem = (props: {
 
             baseComponent = (
                 <div>
-                    <Select
+                    <SmallSelect
                         // style={{ marginLeft: '-24px', marginTop: '-10px' }}
-                        variant="standard"
+                        variant="outlined"
+                        id={props.title}
                         label={props.title + (props.hint ? (" (" + props.hint + ")") : "")}
                         title={props.title + (props.hint ? (" (" + props.hint + ")") : "")}
                         value={value}
@@ -92,7 +94,7 @@ const SettingsItem = (props: {
                         }}
                     >
                         {items}
-                    </Select>
+                    </SmallSelect>
                 </div>
             );
             break;
@@ -131,7 +133,8 @@ const SettingsItem = (props: {
             let textFieldType = props.type === SettingsType.Number ? "number" : undefined;
 
             baseComponent = (<TextField
-                variant='standard'
+                size='small'
+                variant='outlined'
                 type={textFieldType}
                 value={value}
                 title={props.title}

@@ -71,6 +71,7 @@ const MainComponent = (props: {}) => {
     let dateComps = context.settings?.events.map((val, i, arr) => {
         return (
             <DateEvent
+                id={"event_" + i}
                 model={val}
                 key={"datecomp" + i.toString()}
                 onUpdate={(updateEvt) => {
@@ -148,7 +149,7 @@ const MainComponent = (props: {}) => {
     return (
         <div>
             <Button
-                variant='contained'
+                variant='outlined'
                 component='label'
                 startIcon={<FileUploadIcon />}
                 style={{ margin: 10 }}
@@ -157,7 +158,7 @@ const MainComponent = (props: {}) => {
                 <input type="file" onChange={(e) => settingsLoad(e.target.files)} style={{ display: 'none' }} />
             </Button>
             <Button
-                variant='contained'
+                variant='outlined'
                 component='label'
                 startIcon={<FileDownloadIcon />}
                 style={{ margin: 10 }}
@@ -166,7 +167,7 @@ const MainComponent = (props: {}) => {
                 Save Settings
             </Button>
             <Button
-                variant="contained"
+                variant="outlined"
                 style={{ margin: 10 }}
                 startIcon={<ArticleIcon />}
                 onClick={pptxHandler}
@@ -174,7 +175,8 @@ const MainComponent = (props: {}) => {
                 Create PowerPoint File
             </Button>
             <TextField
-                variant='standard'
+                size='small'
+                variant='outlined'
                 title="Year for Calendar"
                 label="Year for Calendar"
                 type="number"
@@ -203,7 +205,7 @@ const MainComponent = (props: {}) => {
                     {dateComps}
                     <div style={{ padding: '5px' }}>
                         <Button
-                            variant='contained'
+                            variant='outlined'
                             onClick={(e) => {
                                 let dateEvtModel: DateEventModel = {
                                     dateInfo: {
@@ -229,6 +231,7 @@ const MainComponent = (props: {}) => {
                 </TabPanel>
             </Paper>
             <Button
+                variant='outlined'
                 style={{ margin: 10 }}
                 title="Clear All Settings"
                 onClick={() => setShowReset(true)}
@@ -248,8 +251,8 @@ const MainComponent = (props: {}) => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setShowReset(false)}>Cancel</Button>
-                    <Button
+                    <Button variant='outlined' onClick={() => setShowReset(false)}>Cancel</Button>
+                    <Button variant='outlined'
                         onClick={() => {
                             context.update(DefaultSettings);
                             setShowReset(false);
