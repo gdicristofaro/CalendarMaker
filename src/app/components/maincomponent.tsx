@@ -147,48 +147,50 @@ const MainComponent = (props: {}) => {
     let formatSettings = context?.settings?.formatting;
 
     return (
-        <div>
-            <Button
-                variant='outlined'
-                component='label'
-                startIcon={<FileUploadIcon />}
-                style={{ margin: 10 }}
-            >
-                Load Settings
-                <input type="file" onChange={(e) => settingsLoad(e.target.files)} style={{ display: 'none' }} />
-            </Button>
-            <Button
-                variant='outlined'
-                component='label'
-                startIcon={<FileDownloadIcon />}
-                style={{ margin: 10 }}
-                onClick={(e) => download(JSON.stringify(context.settings), "settings.json", "application/json")}
-            >
-                Save Settings
-            </Button>
-            <Button
-                variant="outlined"
-                style={{ margin: 10 }}
-                startIcon={<ArticleIcon />}
-                onClick={pptxHandler}
-            >
-                Create PowerPoint File
-            </Button>
-            <TextField
-                size='small'
-                variant='outlined'
-                title="Year for Calendar"
-                label="Year for Calendar"
-                type="number"
-                onChange={(e) => {
-                    let copiedSettings: SettingsModel = structuredClone(context.settings);
-                    copiedSettings.year = parseInt(e.target.value, 10);
-                    context.update(copiedSettings);
-                }}
-                value={(context?.settings?.year) ? context.settings.year : new Date().getFullYear() + 1}
-                style={{ paddingLeft: '10px' }}
-            />
-            <Paper>
+        <div className="min-h-screen flex flex-col">
+            <div className="grow-0 flex-none">
+                <Button
+                    variant='outlined'
+                    component='label'
+                    startIcon={<FileUploadIcon />}
+                    style={{ margin: 10 }}
+                >
+                    Load Settings
+                    <input type="file" onChange={(e) => settingsLoad(e.target.files)} style={{ display: 'none' }} />
+                </Button>
+                <Button
+                    variant='outlined'
+                    component='label'
+                    startIcon={<FileDownloadIcon />}
+                    style={{ margin: 10 }}
+                    onClick={(e) => download(JSON.stringify(context.settings), "settings.json", "application/json")}
+                >
+                    Save Settings
+                </Button>
+                <Button
+                    variant="outlined"
+                    style={{ margin: 10 }}
+                    startIcon={<ArticleIcon />}
+                    onClick={pptxHandler}
+                >
+                    Create PowerPoint File
+                </Button>
+                <TextField
+                    size='small'
+                    variant='outlined'
+                    title="Year for Calendar"
+                    label="Year for Calendar"
+                    type="number"
+                    onChange={(e) => {
+                        let copiedSettings: SettingsModel = structuredClone(context.settings);
+                        copiedSettings.year = parseInt(e.target.value, 10);
+                        context.update(copiedSettings);
+                    }}
+                    value={(context?.settings?.year) ? context.settings.year : new Date().getFullYear() + 1}
+                    style={{ paddingLeft: '10px' }}
+                />
+            </div>
+            <Paper className="grow m-3 p-3">
                 <Tabs value={tabIdx} onChange={(evt, newVal) => setTabIdx(newVal)} style={TAB_STYLES.tabsRoot}>
                     <Tab label="Formatting Settings" icon={<DisplaySettingsIcon />} iconPosition='start' value={0} style={TAB_STYLES.tabRoot}/>
                     <Tab label="Events Settings" icon={<EventIcon />} iconPosition='start' value={1} style={TAB_STYLES.tabRoot}/>
@@ -230,12 +232,16 @@ const MainComponent = (props: {}) => {
                     {bannerComps}
                 </TabPanel>
             </Paper>
+            <div className="grow-0 flex-none">
             <Button
+                className="grow-0 flex-none"
                 variant='outlined'
                 style={{ margin: 10 }}
-                title="Clear All Settings"
                 onClick={() => setShowReset(true)}
-            />
+            >
+                Clear All Settings
+            </Button>
+            
             <Dialog
                 open={showReset}
                 onClose={() => setShowReset(false)}
@@ -263,6 +269,7 @@ const MainComponent = (props: {}) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            </div>
         </div>
     );
 }
