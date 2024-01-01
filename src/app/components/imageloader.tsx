@@ -1,4 +1,6 @@
-// creates dataurl from image upload
+/**
+ *   creates dataurl from image upload
+ */
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
@@ -87,10 +89,14 @@ const STYLES: { [key: string]: CSSProperties } = {
     },
     imageButton: {
         flex: 1,
-        color: 'white',
+        color: '#dfdfdf',
         transition: 'color 0.2s',
+        "&:hover": {
+            color: '#fff',
+            transition: 'color 0.2s'
+        },
         "&:active": {
-            color: '#ddd',
+            color: '#ccc',
             transition: 'color 0.2s'
         }
     } as any,

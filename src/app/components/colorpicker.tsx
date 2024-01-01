@@ -1,8 +1,16 @@
-import { useState } from 'react';
+/**
+ * Component for picking color from a popout menu triggered by a button.
+ */
+import { useState, CSSProperties } from 'react';
 import { SketchPicker } from 'react-color';
 
-
 const ROOT_STYLE = {
+  title: {
+    fontFamily: 'Roboto, sans-serif',
+    fontSize: '12px',
+    lineHeight: '16px',
+    pointerEvents: 'none'
+  },
   color: {
     width: '36px',
     height: '14px',
@@ -49,12 +57,7 @@ const ColorPicker = (props: {
     <div>
       <div>
         {props.title &&
-          <span style={{
-            fontFamily: 'Roboto, sans-serif',
-            fontSize: '12px',
-            lineHeight: '16px',
-            pointerEvents: 'none'
-          }}>
+          <span style={styles.title as CSSProperties}>
             {props.title}
           </span>}
       </div>

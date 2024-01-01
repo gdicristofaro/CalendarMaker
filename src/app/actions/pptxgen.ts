@@ -1,7 +1,8 @@
 import { format, getDay, getDaysInMonth } from 'date-fns';
-import { BorderOptions, DateEntry, Dimension, HeaderOptions, CalOptions, PptxSettings, EventTextOptions } from './model';
+import { BorderOptions, DateEntry, Dimension, HeaderOptions, CalOptions, PptxSettings, EventTextOptions, SettingsModel, MONTHS } from '../model/model';
 import { parseNumYears } from './parsenumyears';
 import pptxgen from "pptxgenjs";
+import { parseHoliday } from './parseholiday';
 
 const DAYS_OF_WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -646,3 +647,21 @@ export const create = async (settings: PptxSettings, events: DateEntry[], banner
 
     pptx.writeFile({ fileName: `${extendedSettings.pptxName}-${year.toString()}` }); 
 }
+
+
+export default function generatePptxFromSettings(settings: SettingsModel) {
+    let year = settings.year;
+    let events: DateEntry[] = settings.events.map((val) => {
+        let date = parseHoliday(val.dateInfo, year);
+        return {
+            month: date.month,
+            day: date.date,
+            name: val.eventName,
+            img: val.imageDataUrl || ""
+        }
+    });
+
+    let banners: any[] = MONTHS.map((val) => (settings.banners as any)[val]);
+
+    create(settings.formatting, events, banners, settings.year);
+};

@@ -1,5 +1,5 @@
 import { addDays, addWeeks, getDay, setDay } from 'date-fns';
-import {DateTypeInfo } from './model';
+import {DateTypeInfo } from '../model/model';
 
 
 export const parseHoliday = (dateInfo: DateTypeInfo, year: number): { month: number, date: number } => {

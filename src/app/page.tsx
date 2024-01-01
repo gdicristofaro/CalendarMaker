@@ -1,7 +1,7 @@
 "use client"; 
 
 import React from "react";
-import MainComponent from "./components/maincomponent";
+import MainView from "./views/mainview";
 import { ModelContextComponent } from './model/modelcontext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -11,7 +11,7 @@ export default () => (
   <React.StrictMode>
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <ModelContextComponent>
-      <MainComponent />
+      <MainView />
     </ModelContextComponent>
   </LocalizationProvider>
 </React.StrictMode>

@@ -1,8 +1,10 @@
+/**
+ * A compressed drop down select component
+ */
 import * as React from 'react';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent, SelectProps } from '@mui/material/Select';
+import Select, { SelectProps } from '@mui/material/Select';
 
 export default function SmallSelect<Value>(props: { children?: any[], id: string, title: string, minWidth?: number } & SelectProps<Value>) {
     let { children, id, title, minWidth, ...others } = props;
