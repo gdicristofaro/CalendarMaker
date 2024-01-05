@@ -4,7 +4,7 @@ import Paper from '@mui/material/Paper';
 import { DefaultSettings } from '../model/model';
 import React, { useContext, useState } from 'react';
 import { ModelContext } from '../model/modelcontext';
-import { Box } from '@mui/material';
+import { Box, CssBaseline, Typography } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import PhotoIcon from '@mui/icons-material/Photo';
@@ -16,19 +16,6 @@ import ResetButton from '../components/resetbutton';
 import { useRouter } from 'next/navigation';
 import { EVENTS_PATH, FORMAT_SETTINGS_PATH, BANNERS_PATH } from '../model/routes';
 
-let TAB_HEIGHT = '40px';
-
-let TAB_STYLES = {
-    tabsRoot: {
-        minHeight: TAB_HEIGHT,
-        height: TAB_HEIGHT
-    },
-    tabRoot: {
-        minHeight: TAB_HEIGHT,
-        height: TAB_HEIGHT
-
-    }
-};
 
 export default (props: { slug: string }) => {
     let context = useContext(ModelContext);
@@ -50,36 +37,14 @@ export default (props: { slug: string }) => {
     }
     
     return (
-        <div className="min-h-screen flex flex-col">
-            <Header {...context} />
+        // <div className="min-h-screen flex flex-col">
+        <Box sx={{ display: 'flex flex-col' }}>
+            <CssBaseline />
+            <Header {...{...context, ...props}} />
+            {/* <Typography>
+                Hello there
+            </Typography> */}
             <Paper className="grow m-3 p-3">
-                <Tabs 
-                    onChange={(_, newVal) => router.push(newVal)} 
-                    value={slug} 
-                    style={TAB_STYLES.tabsRoot}
-                >
-                    <Tab
-                        label="Events Settings"
-                        icon={<EventIcon />}
-                        iconPosition='start'
-                        value={EVENTS_PATH}
-                        style={TAB_STYLES.tabRoot}
-                    />
-                    <Tab
-                        label="Banners"
-                        icon={<PhotoIcon />}
-                        iconPosition='start'
-                        value={BANNERS_PATH}
-                        style={TAB_STYLES.tabRoot}
-                    />
-                    <Tab
-                        label="Formatting Settings"
-                        icon={<DisplaySettingsIcon />}
-                        iconPosition='start'
-                        value={FORMAT_SETTINGS_PATH}
-                        style={TAB_STYLES.tabRoot}
-                    />
-                </Tabs>
                 <Box sx={{ p: 3 }}>
                     {tabComponent}
                 </Box>
@@ -87,6 +52,6 @@ export default (props: { slug: string }) => {
             <div className="grow-0 flex-none">
                 <ResetButton reset={() => context.update(DefaultSettings)} />
             </div>
-        </div>
+        </Box>
     );
 }
