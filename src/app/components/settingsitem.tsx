@@ -299,7 +299,7 @@ const AllFormatSettings = (props: {
     let childrenRows = rows.map(childArr => (<Grid item xs={12/rowNum}>{childArr}</Grid>));
 
     return (
-        <Grid container spacing={3}>
+        <Grid container>
             {childrenRows}
         </Grid>
     );

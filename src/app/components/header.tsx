@@ -37,15 +37,14 @@ import ResetButton from '../components/resetbutton';
 import { useRouter } from 'next/navigation';
 import { EVENTS_PATH, FORMAT_SETTINGS_PATH, BANNERS_PATH } from '../model/routes';
 import { Router } from "next/router";
+import ImportExportIcon from '@mui/icons-material/ImportExport';
 
 
 const pages = [
     { name: 'Events', icon: <EventIcon />, route: EVENTS_PATH },
     { name: 'Banners', icon: <DisplaySettingsIcon />, route: BANNERS_PATH },
-    { name: 'Format Settings', icon: <PhotoIcon />, route: FORMAT_SETTINGS_PATH }
+    { name: 'Formatting', icon: <PhotoIcon />, route: FORMAT_SETTINGS_PATH }
 ];
-
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 export default function ResponsiveAppBar(props: {slug: string}) {
     let { slug } = props
@@ -68,8 +67,19 @@ export default function ResponsiveAppBar(props: {slug: string}) {
         setAnchorElUser(null);
     };
 
+
+    // import export settings
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
+
     return (
-        <AppBar component="nav">
+        <AppBar component="nav" position="sticky">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -93,7 +103,7 @@ export default function ResponsiveAppBar(props: {slug: string}) {
                             anchorEl={anchorElNav}
                             anchorOrigin={{
                                 vertical: 'bottom',
-                                horizontal: 'left',
+                                horizontal: 'center',
                             }}
                             keepMounted
                             transformOrigin={{
@@ -122,7 +132,7 @@ export default function ResponsiveAppBar(props: {slug: string}) {
                         />
                         {pages.map((page) => (
                             <Button
-                                style={{backgroundColor: (page.route === slug ? "rgba(255, 255, 255, 0.1)" : "transparent") }}
+                                style={{color: 'white', backgroundColor: (page.route === slug ? "rgba(255, 255, 255, 0.1)" : "transparent") }}
                                 startIcon={page.icon}
                                 key={page.name}
                                 onClick={e => router.push(page.route)}
@@ -132,6 +142,39 @@ export default function ResponsiveAppBar(props: {slug: string}) {
                                 {page.name}
                             </Button>
                         ))}
+                        <Button
+                            style={{color: 'white'}}
+                            startIcon={<ImportExportIcon/>}
+                            key="ImportExportButton"
+                            onClick={handleClick}
+                            className="text-white flex mx-1"
+                            sx={{ my: 2, paddingLeft: '15px', paddingRight: '15px' }}
+                        >
+                            Settings ▼
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl}
+                            open={open}
+                            onClose={handleClose}
+                            
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'left',
+                            }}
+                            MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <MenuItem onClick={handleClose}>Export Settings</MenuItem>
+                            <MenuItem onClick={handleClose}>Import Settings</MenuItem>
+                            <MenuItem onClick={handleClose}>Reset Settings</MenuItem>
+                        </Menu>
                     </Box>
                 </Toolbar>
             </Container>

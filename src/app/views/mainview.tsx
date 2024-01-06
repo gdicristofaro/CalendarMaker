@@ -38,20 +38,12 @@ export default (props: { slug: string }) => {
     
     return (
         // <div className="min-h-screen flex flex-col">
-        <Box sx={{ display: 'flex flex-col' }}>
+        <Box>
             <CssBaseline />
             <Header {...{...context, ...props}} />
-            {/* <Typography>
-                Hello there
-            </Typography> */}
-            <Paper className="grow m-3 p-3">
-                <Box sx={{ p: 3 }}>
-                    {tabComponent}
-                </Box>
-            </Paper>
-            <div className="grow-0 flex-none">
-                <ResetButton reset={() => context.update(DefaultSettings)} />
-            </div>
+            <Box className="p-2">
+                {tabComponent}
+            </Box>
         </Box>
     );
 }
