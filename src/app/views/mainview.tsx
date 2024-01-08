@@ -42,7 +42,7 @@ export default (props: { slug: string }) => {
             <CssBaseline />
             <Header {...{...context, ...props}} />
             <Box className="p-2">
-                {tabComponent}
+                {/* {tabComponent} */}
             </Box>
         </Box>
     );

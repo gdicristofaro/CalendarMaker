@@ -169,7 +169,7 @@ const SettingsCard = (props: {
 
 
 
-const AllFormatSettings = (props: {
+export default (props: {
     model: PptxSettings, //{[key: string]: any},
     onChange: (model: PptxSettings) => void
 }) => {
@@ -189,7 +189,7 @@ const AllFormatSettings = (props: {
 
     let getField = (onSettingsUpdate: (newVal: any) => void, initialVal: any, type: SettingsType, title: string, hintText: string | undefined = undefined) => {
         return (
-            <div className="SettingsItem">
+            <div className="SettingsItem" key={title}>
                 <SettingsItem
                     title={title}
                     setValue={onSettingsUpdate}
@@ -231,7 +231,7 @@ const AllFormatSettings = (props: {
     }
 
     const settingCards = [
-        (<SettingsCard title="General">
+        (<SettingsCard title="General" key="general">
             {getField((newName) => updateField(["pptxName"], newName),
                 model?.pptxName, SettingsType.Text, "PowerPoint File Name")}
             {getField((newFont) => updateField(["font"], newFont),
@@ -242,13 +242,13 @@ const AllFormatSettings = (props: {
                 model?.eventTextOptions?.color, SettingsType.Color, "Event Text Color",
                 "i.e. the color of the text for 'Christmas Day'")}
         </SettingsCard>),
-        (<SettingsCard title="Calendar Border">
+        (<SettingsCard title="Calendar Border" key="calendarBorder">
             {getPt((newPt) => updateField(["calendarBorder", "pt"], newPt),
                 model.calendarBorder.pt, "Width", "in points")}
             {getField((newColor) => updateField(["calendarBorder", "color"], newColor),
                 model.calendarBorder.color, SettingsType.Color, "Color")}
         </SettingsCard>),
-        (<SettingsCard title="Calendar Header" subtitle="(i.e. Sunday, Monday, Tuesday)">
+        (<SettingsCard title="Calendar Header" subtitle="(i.e. Sunday, Monday, Tuesday)" key="calendarHeader">
             {getField((newVal) => updateField(["headerOptions", "valign"], newVal),
                 model.headerOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment")}
             {getField((newVal) => updateField(["headerOptions", "align"], newVal),
@@ -258,7 +258,7 @@ const AllFormatSettings = (props: {
             {getField((newVal) => updateField(["headerOptions", "color"], newVal),
                 model.headerOptions.color, SettingsType.Color, "Text Color")}
         </SettingsCard>),
-        (<SettingsCard title="Calendar Number" subtitle="(i.e. the '21' for the date in a box)">
+        (<SettingsCard title="Calendar Number" subtitle="(i.e. the '21' for the date in a box)" key="calendarNumber">
             {getField((newVal) => updateField(["bodyOptions", "align"], newVal),
                 model.bodyOptions.align, SettingsType.HorizontalAlign, "Horizontal Alignment")}
             {getField((newVal) => updateField(["bodyOptions", "color"], newVal),
@@ -268,7 +268,7 @@ const AllFormatSettings = (props: {
             {getField((newVal) => updateField(["bodyOptions", "italic"], newVal),
                 model.bodyOptions.italic, SettingsType.Boolean, "Italicize Text")}
         </SettingsCard>),
-        (<SettingsCard title="Miniature Calendar Options" subtitle="(i.e. if the month is February, the smaller calendar for March)">
+        (<SettingsCard title="Miniature Calendar Options" subtitle="(i.e. if the month is February, the smaller calendar for March)" key="miniatureCalendarOptions">
             {getField((newVal) => updateField(["miniCalOptions", "valign"], newVal),
                 model.miniCalOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
             {getField((newVal) => updateField(["miniCalOptions", "align"], newVal),
@@ -282,7 +282,7 @@ const AllFormatSettings = (props: {
             {getField((newVal) => updateField(["miniCalUnderlineColor", "color"], newVal),
                 model.miniCalUnderlineColor.color, SettingsType.Color, "Header Border Color", "the color of the line seperating the header")}
         </SettingsCard>),
-        (<SettingsCard title="Calendar Title Text" subtitle="(i.e. like 'January')">
+        (<SettingsCard title="Calendar Title Text" subtitle="(i.e. like 'January')" key="calendarTitleText">
             {getField((newVal) => updateField(["titleTextOptions", "valign"], newVal),
                 model.titleTextOptions.valign, SettingsType.VerticalAlign, "Vertical Alignment in Empty Space")}
             {getField((newVal) => updateField(["titleTextOptions", "color"], newVal),
@@ -296,7 +296,7 @@ const AllFormatSettings = (props: {
         rows[i % rowNum].push(settingCard);
     }
 
-    let childrenRows = rows.map(childArr => (<Grid item xs={12/rowNum}>{childArr}</Grid>));
+    let childrenRows = rows.map((childArr, rowIdx) => (<Grid key={rowIdx} item xs={12/rowNum}>{childArr}</Grid>));
 
     return (
         <Grid container>
@@ -304,6 +304,3 @@ const AllFormatSettings = (props: {
         </Grid>
     );
 }
-
-
-export default AllFormatSettings;
