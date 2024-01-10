@@ -3,7 +3,6 @@
 import React, { useContext } from "react";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { usePathname } from "next/navigation";
 import { Box, CssBaseline } from "@mui/material";
 import Header from "./header";
 import { ModelContext, ModelContextComponent } from "../model/modelcontext";
@@ -13,9 +12,22 @@ import EventsView from "../views/eventsview";
 import FormatSettingsView from "../views/formatsettingsview";
 
 
-export default (props: {slug: string}) => {
+export default (props: { slug: string }) => {
+
+    return (
+        <React.StrictMode>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <ModelContextComponent>
+                    <MainComponentReact {...props} />
+                </ModelContextComponent>
+            </LocalizationProvider>
+        </React.StrictMode>
+    );
+}
+
+const MainComponentReact = (props: { slug: string }) => {
     let context = useContext(ModelContext);
-    
+
     let tabComponent;
     switch (props.slug) {
         case FORMAT_SETTINGS_PATH:
@@ -28,19 +40,14 @@ export default (props: {slug: string}) => {
             tabComponent = (<EventsView {...context} />);
             break;
     }
+
     return (
-        <React.StrictMode>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <ModelContextComponent>
-                    <Box>
-                        <CssBaseline />
-                        <Header {...{ ...context, ...props }} />
-                        <Box className="p-2">
-                            {tabComponent}
-                        </Box>
-                    </Box>
-                </ModelContextComponent>
-            </LocalizationProvider>
-        </React.StrictMode>
+        <Box>
+            <CssBaseline />
+            <Header {...{ ...context, ...props }} />
+            <Box className="p-2">
+                {tabComponent}
+            </Box>
+        </Box>
     );
 }

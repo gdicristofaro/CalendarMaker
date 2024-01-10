@@ -15,13 +15,14 @@ import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import PhotoIcon from '@mui/icons-material/Photo';
 import { useRouter } from 'next/navigation';
 import { EVENTS_PATH, FORMAT_SETTINGS_PATH, BANNERS_PATH } from '../model/routes';
-import ImportExportIcon from '@mui/icons-material/ImportExport';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { SettingsModel } from "../model/model";
 
 
 
 
-export default function ResponsiveAppBar(props: {slug: string}) {
+export default function ResponsiveAppBar(props: { slug: string }) {
     let { slug } = props;
 
     const router = useRouter();
@@ -43,17 +44,24 @@ export default function ResponsiveAppBar(props: {slug: string}) {
         { name: 'Events', icon: <EventIcon />, route: EVENTS_PATH },
         { name: 'Banners', icon: <DisplaySettingsIcon />, route: BANNERS_PATH },
         { name: 'Formatting', icon: <PhotoIcon />, route: FORMAT_SETTINGS_PATH },
-        { name: 'Manage Settings', icon: <SettingsIcon/>, subMenu: {
-            isMenuOpen: open,
-            openMenu: (evt: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(evt.currentTarget),
-            closeMenu: () => setAnchorEl(null),
-            anchorEl: anchorEl,
-            menuItems: [
-                { title: 'Import Settings', action: () => console.log("hi") },
-                { title: 'Export Settings', action: () => console.log("hi") },
-                { title: 'Reset Settings', action: () => console.log("hi") },
-            ]
-        }}
+        {
+            name: 'Manage Settings', icon: <SettingsIcon />, subMenu: {
+                isMenuOpen: open,
+                openMenu: (evt: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(evt.currentTarget),
+                closeMenu: () => setAnchorEl(null),
+                anchorEl: anchorEl,
+                menuItems: [
+                    { title: 'Import Settings', action: () => console.log("hi") },
+                    { title: 'Export Settings', action: () => console.log("hi") },
+                    { title: 'Reset Settings', action: () => console.log("hi") },
+                ]
+            }
+        },
+        {
+            name: 'Generate', icon: <SaveAltIcon />, action: () => {
+                console.log("download");
+            }
+        }
     ];
 
     return (
@@ -71,10 +79,10 @@ export default function ResponsiveAppBar(props: {slug: string}) {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <img 
-                            src={CalendarMakerWhite.src} 
-                            className="ml-4 my-auto" 
-                            style={{height: '25px'}} 
+                        <img
+                            src={CalendarMakerWhite.src}
+                            className="ml-4 my-auto"
+                            style={{ height: '25px' }}
                         />
                         <Menu
                             id="menu-appbar"
@@ -103,73 +111,74 @@ export default function ResponsiveAppBar(props: {slug: string}) {
                         </Menu>
                     </Box>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                        <img 
-                            src={CalendarMakerWhite.src} 
-                            className="mr-5 my-auto" 
-                            style={{height: '25px'}} 
+                        <img
+                            src={CalendarMakerWhite.src}
+                            className="mr-5 my-auto"
+                            style={{ height: '25px' }}
                         />
-                        {pages.map((page) => (
-                            <>
-                                <Button
-                                    startIcon={page.icon}
-                                    key={page.name}
-                                    onClick={e => {
-                                        if (page.route) {
-                                            router.push(page.route);
-                                        } else if (page?.subMenu?.openMenu) {
-                                            page.subMenu.openMenu(e);
-                                        }
-                                    }}
-                                    className="text-white flex mx-1"
-                                    sx={{ 
-                                        my: 2, 
-                                        borderRadius: page?.route && '28px', 
-                                        paddingLeft: '10px', 
-                                        paddingRight: '10px', 
-                                        color: 'white', 
-                                        "&:hover": {
-                                            backgroundColor: "rgba(255, 255, 255, 0.3)" 
-                                        },
-                                        backgroundColor: (slug.toLowerCase() == page?.route?.toLowerCase()
-                                            ? "rgba(255, 255, 255, 0.2)" 
-                                            : undefined)  
-                                        }}
-                                >
-                                    {page.name}
-                                </Button>
-                                {
-                                    page?.subMenu && (
-                                        <Menu
-                                            anchorEl={page.subMenu.anchorEl}
-                                            open={page.subMenu.isMenuOpen}
-                                            onClose={evt => page.subMenu.closeMenu()}
-                                            
-                                            anchorOrigin={{
-                                                vertical: 'bottom',
-                                                horizontal: 'left',
-                                            }}
-                                            keepMounted
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'left',
-                                            }}
-                                            MenuListProps={{
-                                            'aria-labelledby': 'basic-button',
-                                            }}
-                                        >
-                                            {page.subMenu.menuItems.map((menuItem, idx) => (
-                                                <MenuItem key={idx} onClick={(evt) => {
-                                                    menuItem.action();
-                                                    page.subMenu.closeMenu();
-                                                }}>
-                                                    {menuItem.title}
-                                                </MenuItem>
-                                            ))}
-                                        </Menu>
-                                    )
-                                }
-                            </>
+                        {pages.map((page, idx) => (
+                            <Button
+                                startIcon={page.icon}
+                                key={page.name}
+                                onClick={e => {
+                                    if (page.action) {
+                                        page.action();
+                                    } else if (page.route) {
+                                        router.push(page.route);
+                                    } else if (page?.subMenu?.openMenu) {
+                                        page.subMenu.openMenu(e);
+                                    }
+                                }}
+                                className="text-white flex mx-1"
+                                sx={{
+                                    my: 2,
+                                    borderRadius: page?.subMenu ? undefined : '28px',
+                                    paddingLeft: '10px',
+                                    paddingRight: '10px',
+                                    color: 'white',
+                                    "&:hover": {
+                                        backgroundColor: "rgba(255, 255, 255, 0.3)"
+                                    },
+                                    backgroundColor: (slug.toLowerCase() == page?.route?.toLowerCase()
+                                        ? "rgba(255, 255, 255, 0.2)"
+                                        : undefined)
+                                }}
+                            >
+                                {page.name}
+                            </Button>
                         ))}
+                        {pages.map((page, idx) => {
+                            return page?.subMenu ?
+                                (<Menu
+                                    key={"menu_" + idx}
+                                    anchorEl={page.subMenu.anchorEl}
+                                    open={page.subMenu.isMenuOpen}
+                                    onClose={evt => page.subMenu.closeMenu()}
+
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    }}
+                                    MenuListProps={{
+                                        'aria-labelledby': 'basic-button',
+                                    }}
+                                >
+                                    {page.subMenu.menuItems.map((menuItem, idx) => (
+                                        <MenuItem key={idx} onClick={(evt) => {
+                                            menuItem.action();
+                                            page.subMenu.closeMenu();
+                                        }}>
+                                            {menuItem.title}
+                                        </MenuItem>
+                                    ))}
+                                </Menu>) :
+                                undefined
+                        })}
                     </Box>
                 </Toolbar>
             </Container>

@@ -46,6 +46,7 @@ export default function EventsView(props: ModelContextProps) {
 
                         let copiedSettings: SettingsModel = structuredClone(settings);
                         copiedSettings.events.push(dateEvtModel);
+                        console.log("updating to", copiedSettings)
                         update(copiedSettings);
                     }}
                 >

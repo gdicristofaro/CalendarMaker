@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext } from "react";
 import { useEffect, useState } from "react";
 import { DefaultSettings, SettingsModel } from "./model";
 
@@ -10,7 +10,7 @@ export interface ModelContextProps {
     update: (newSettings: SettingsModel) => void
 }
 
-export const ModelContext = React.createContext<ModelContextProps>({
+export const ModelContext = createContext<ModelContextProps>({
     settings: DefaultSettings,
     update: (newSettings: SettingsModel) => { }
 });
@@ -31,7 +31,7 @@ export const ModelContextComponent = (props: { children: any }) => {
         }
     }, [model]);
 
-    return (<ModelContext.Provider value={{ settings: model, update: setModel }}>
+    return (<ModelContext.Provider value={{ settings: model, update: setModel}}>
         {props.children}
     </ModelContext.Provider>)
 }
