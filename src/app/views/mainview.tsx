@@ -13,10 +13,25 @@ import EventsView from "./eventsview";
 
 
 export default (props: { slug: string }) => {
-    
-    let {slug} = props;
+
+    let { slug } = props;
+
+    return (
+        <React.StrictMode>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <ModelContextComponent>
+                    <InternalMain slug={slug} />
+                </ModelContextComponent>
+            </LocalizationProvider>
+        </React.StrictMode>
+    );
+}
+
+const InternalMain = (props: { slug: string }) => {
+    let { slug } = props;
+
     let context = useContext(ModelContext);
-    
+
     let component;
     switch (slug) {
         case FORMAT_SETTINGS_PATH:
@@ -30,18 +45,13 @@ export default (props: { slug: string }) => {
             component = <EventsView {...context} />;
             break;
     }
-
     return (
-        <React.StrictMode>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <ModelContextComponent>
-                    <CssBaseline />
-                    <Header slug={slug} />
-                    <Box className="p-2">
-                        {component}
-                    </Box>
-                </ModelContextComponent>
-            </LocalizationProvider>
-        </React.StrictMode>
-    );
+        <>
+            <CssBaseline />
+            <Header slug={slug} />
+            <Box className="p-2">
+                {component}
+            </Box>
+        </>
+    )
 }
