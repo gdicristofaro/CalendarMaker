@@ -3,14 +3,14 @@
 
 const nextConfig = {
     output: 'export',
-    async rewrites() {
-        return [
-          {
-            source: '/:any*',
-            destination: '/',
-          },
-        ];
-      },
+    // async rewrites() {
+    //     return [
+    //       {
+    //         source: '/:any*',
+    //         destination: '/',
+    //       },
+    //     ];
+    //   },
     // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
     // trailingSlash: true,
    

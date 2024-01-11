@@ -17,12 +17,11 @@ import { useRouter } from 'next/navigation';
 import { EVENTS_PATH, FORMAT_SETTINGS_PATH, BANNERS_PATH } from '../model/routes';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { SettingsModel } from "../model/model";
 
 
 
 
-export default function ResponsiveAppBar(props: { slug: string }) {
+export default function Header(props: { slug: string }) {
     let { slug } = props;
 
     const router = useRouter();
