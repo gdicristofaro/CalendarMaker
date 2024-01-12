@@ -48,7 +48,7 @@ const InternalMain = (props: { slug: string }) => {
     return (
         <>
             <CssBaseline />
-            <Header slug={slug} />
+            <Header slug={slug} context={context} />
             <Box className="p-2">
                 {component}
             </Box>

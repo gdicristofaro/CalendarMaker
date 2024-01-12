@@ -17,12 +17,15 @@ import { useRouter } from 'next/navigation';
 import { EVENTS_PATH, FORMAT_SETTINGS_PATH, BANNERS_PATH } from '../model/routes';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { SettingsModel } from "../model/model";
+import { ModelContextProps } from "../model/modelcontext";
+import download from "downloadjs";
 
 
 
 
-export default function Header(props: { slug: string }) {
-    let { slug } = props;
+export default function Header(props: { slug: string, context: ModelContextProps }) {
+    let { slug, context } = props;
 
     const router = useRouter();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -51,14 +54,15 @@ export default function Header(props: { slug: string }) {
                 anchorEl: anchorEl,
                 menuItems: [
                     { title: 'Import Settings', action: () => console.log("hi") },
-                    { title: 'Export Settings', action: () => console.log("hi") },
+                    { title: 'Export Settings', action: () => download(JSON.stringify(context.settings), "settings.json", "application/json") },
                     { title: 'Reset Settings', action: () => console.log("hi") },
                 ]
             }
         },
         {
             name: 'Generate', icon: <SaveAltIcon />, action: () => {
-                console.log("download");
+                console.log("Generating...");
+                
             }
         }
     ];
