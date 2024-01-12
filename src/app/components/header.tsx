@@ -128,13 +128,16 @@ export default function Header(props: { slug: string }) {
                                         page.subMenu.openMenu(e);
                                     }
                                 }}
-                                className="text-white flex mx-1"
+                                className="text-white flex"
+                                disabled={slug.toLowerCase() == page?.route?.toLowerCase()}
                                 sx={{
                                     my: 2,
-                                    borderRadius: page?.subMenu ? undefined : '28px',
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px',
-                                    color: 'white',
+                                    borderRadius: '7px',
+                                    marginLeft: '2px',
+                                    marginRight: '2px',
+                                    paddingLeft: '7px',
+                                    paddingRight: '7px',
+                                    color: 'white !important',
                                     "&:hover": {
                                         backgroundColor: "rgba(255, 255, 255, 0.3)"
                                     },

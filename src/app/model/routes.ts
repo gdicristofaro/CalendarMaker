@@ -16,3 +16,4 @@ export const BANNERS_PATH = "banners";
 // export const ROUTE_PATHS = ROUTES.map(r => r.pathname);
 
 export const ROUTE_PATHS = [FORMAT_SETTINGS_PATH, EVENTS_PATH, BANNERS_PATH]
+export const DEFAULT_PATH = EVENTS_PATH;

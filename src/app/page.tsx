@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import MainView from "./views/mainview";
 import { redirect } from "next/navigation";
+import { DEFAULT_PATH } from "./model/routes";
 
 
 export default () => {
-    redirect("/events");
+    redirect("/" + DEFAULT_PATH);
 }

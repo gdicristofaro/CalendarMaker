@@ -29,7 +29,7 @@ export default (props: { slug: string }) => {
 
 const InternalMain = (props: { slug: string }) => {
     let { slug } = props;
-
+    
     let context = useContext(ModelContext);
 
     let component;
