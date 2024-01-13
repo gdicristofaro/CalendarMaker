@@ -17,9 +17,11 @@ import { useRouter } from 'next/navigation';
 import { EVENTS_PATH, FORMAT_SETTINGS_PATH, BANNERS_PATH } from '../model/routes';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { SettingsModel } from "../model/model";
+import { DefaultSettings } from "../model/model";
 import { ModelContextProps } from "../model/modelcontext";
 import download from "downloadjs";
+import settingsLoad from "../actions/settingsload";
+import generatePptxFromSettings from "../actions/pptxgen";
 
 
 
@@ -53,16 +55,31 @@ export default function Header(props: { slug: string, context: ModelContextProps
                 closeMenu: () => setAnchorEl(null),
                 anchorEl: anchorEl,
                 menuItems: [
-                    { title: 'Import Settings', action: () => console.log("hi") },
-                    { title: 'Export Settings', action: () => download(JSON.stringify(context.settings), "settings.json", "application/json") },
-                    { title: 'Reset Settings', action: () => console.log("hi") },
+                    { 
+                        title: 'Import Settings', 
+                        action: () => {
+                            let input = document.createElement('input');
+                            input.type = 'file';
+                            input.onchange = e => { 
+                                settingsLoad(context.update, (e.target as any).files);
+                                input.remove();
+                             }
+                            input.click();
+                        }
+                    },
+                    { 
+                        title: 'Export Settings', 
+                        action: () => download(JSON.stringify(context.settings), "settings.json", "application/json") },
+                    { 
+                        title: 'Reset Settings',
+                        action: () => context.update(DefaultSettings)
+                    },
                 ]
             }
         },
         {
             name: 'Generate', icon: <SaveAltIcon />, action: () => {
-                console.log("Generating...");
-                
+                generatePptxFromSettings(context.settings);
             }
         }
     ];
@@ -175,11 +192,13 @@ export default function Header(props: { slug: string, context: ModelContextProps
                                     }}
                                 >
                                     {page.subMenu.menuItems.map((menuItem, idx) => (
-                                        <MenuItem key={idx} onClick={(evt) => {
-                                            menuItem.action();
-                                            page.subMenu.closeMenu();
-                                        }}>
-                                            {menuItem.title}
+                                        <MenuItem 
+                                            key={idx}
+                                            onClick={(evt) => {
+                                                menuItem.action();
+                                                page.subMenu.closeMenu();
+                                            }}>
+                                                {menuItem.title}
                                         </MenuItem>
                                     ))}
                                 </Menu>) :
@@ -191,46 +210,3 @@ export default function Header(props: { slug: string, context: ModelContextProps
         </AppBar>
     );
 }
-
-
-{/* <Button
-variant='outlined'
-component='label'
-startIcon={<FileUploadIcon />}
-style={{ margin: 10 }}
->
-Load Settings
-<input type="file" onChange={(e) => settingsLoad(e.target.files)} style={{ display: 'none' }} />
-</Button>
-<Button
-variant='outlined'
-component='label'
-startIcon={<FileDownloadIcon />}
-style={{ margin: 10 }}
-onClick={(e) => download(JSON.stringify(context.settings), "settings.json", "application/json")}
->
-Save Settings
-</Button>
-<Button
-variant="outlined"
-style={{ margin: 10 }}
-startIcon={<ArticleIcon />}
-onClick={pptxHandler}
->
-Create PowerPoint File
-</Button>
-<TextField
-size='small'
-variant='outlined'
-title="Year for Calendar"
-label="Year for Calendar"
-type="number"
-onChange={(e) => {
-    let copiedSettings: SettingsModel = structuredClone(context.settings);
-    copiedSettings.year = parseInt(e.target.value, 10);
-    context.update(copiedSettings);
-}}
-value={(context?.settings?.year) ? context.settings.year : new Date().getFullYear() + 1}
-style={{ paddingLeft: '10px' }}
-/>
-</div> */}
