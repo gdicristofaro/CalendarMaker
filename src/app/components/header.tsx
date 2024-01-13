@@ -1,5 +1,5 @@
-import { Button } from "@mui/material";
-import * as React from 'react';
+import { Button, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -22,7 +22,9 @@ import { ModelContextProps } from "../model/modelcontext";
 import download from "downloadjs";
 import settingsLoad from "../actions/settingsload";
 import generatePptxFromSettings from "../actions/pptxgen";
-
+import UploadIcon from '@mui/icons-material/Upload';
+import DownloadIcon from '@mui/icons-material/Download';
+import ClearIcon from '@mui/icons-material/Clear';
 
 
 
@@ -30,19 +32,12 @@ export default function Header(props: { slug: string, context: ModelContextProps
     let { slug, context } = props;
 
     const router = useRouter();
-    const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-
-    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElNav(event.currentTarget);
-    };
-
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
-    };
 
     // import export settings
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
+    const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(settingsAnchorEl);
+
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     let pages = [
         { name: 'Events', icon: <EventIcon />, route: EVENTS_PATH },
@@ -51,27 +46,31 @@ export default function Header(props: { slug: string, context: ModelContextProps
         {
             name: 'Manage Settings', icon: <SettingsIcon />, subMenu: {
                 isMenuOpen: open,
-                openMenu: (evt: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(evt.currentTarget),
-                closeMenu: () => setAnchorEl(null),
-                anchorEl: anchorEl,
+                openMenu: (evt: React.MouseEvent<HTMLButtonElement>) => setSettingsAnchorEl(evt.currentTarget),
+                closeMenu: () => setSettingsAnchorEl(null),
+                anchorEl: settingsAnchorEl,
                 menuItems: [
-                    { 
-                        title: 'Import Settings', 
+                    {
+                        title: 'Import Settings',
+                        icon: <UploadIcon/>,
                         action: () => {
                             let input = document.createElement('input');
                             input.type = 'file';
-                            input.onchange = e => { 
+                            input.onchange = e => {
                                 settingsLoad(context.update, (e.target as any).files);
                                 input.remove();
-                             }
+                            }
                             input.click();
                         }
                     },
-                    { 
-                        title: 'Export Settings', 
-                        action: () => download(JSON.stringify(context.settings), "settings.json", "application/json") },
-                    { 
+                    {
+                        title: 'Export Settings',
+                        icon: <DownloadIcon/>,
+                        action: () => download(JSON.stringify(context.settings), "settings.json", "application/json")
+                    },
+                    {
                         title: 'Reset Settings',
+                        icon: <ClearIcon/>,
                         action: () => context.update(DefaultSettings)
                     },
                 ]
@@ -94,8 +93,8 @@ export default function Header(props: { slug: string, context: ModelContextProps
                             aria-label="account of current user"
                             aria-controls="menu-appbar"
                             aria-haspopup="true"
-                            onClick={handleOpenNavMenu}
                             color="inherit"
+                            onClick={(evt) => setDrawerOpen(true)}
                         >
                             <MenuIcon />
                         </IconButton>
@@ -104,7 +103,60 @@ export default function Header(props: { slug: string, context: ModelContextProps
                             className="ml-4 my-auto"
                             style={{ height: '25px' }}
                         />
-                        <Menu
+
+                        <Drawer
+                            anchor="left"
+                            open={drawerOpen}
+                            onClose={() => setDrawerOpen(false)}
+                        >
+                            <List>
+                                {pages.map((page, index) => {
+                                    let listContents = (<>
+                                        <ListItemIcon>{page.icon}</ListItemIcon>
+                                        <ListItemText primary={page.name} />
+                                    </>);
+
+                                    if (page.action || (page.route && page.route.toLowerCase() != slug.toLowerCase())) {
+                                        listContents = (
+                                            <ListItemButton onClick={(e) => {
+                                                if (page.action) {
+                                                    page.action();
+                                                } else if (page.route) {
+                                                    router.push(page.route);
+                                                }
+                                            }}>
+                                                {listContents}
+                                            </ListItemButton>
+                                        );
+                                    }
+
+                                    let listItem = (<ListItem key={index} disablePadding>{listContents}</ListItem>)
+                                    if (page.subMenu) {
+                                        listItem = <>
+                                            {listItem}
+                                            <List>
+                                            {
+                                                page.subMenu.menuItems.map((item, idx) => {
+                                                    return (
+                                                        <ListItem disablePadding>
+                                                            <ListItemButton onClick={(e) => item.action()}>
+                                                                <ListItemIcon>{item.icon}</ListItemIcon>
+                                                                <ListItemText primary={item.title} />
+                                                            </ListItemButton>
+                                                        </ListItem>
+                                                    )
+                                                })
+                                            }
+                                            </List>
+                                        </>;
+                                    }
+
+                                    return listItem;
+                                })}
+                            </List>
+                        </Drawer>
+
+                        {/* <Menu
                             id="menu-appbar"
                             anchorEl={anchorElNav}
                             anchorOrigin={{
@@ -128,7 +180,7 @@ export default function Header(props: { slug: string, context: ModelContextProps
                                     <Typography textAlign="center">{page.name}</Typography>
                                 </MenuItem>
                             ))}
-                        </Menu>
+                        </Menu> */}
                     </Box>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         <img
@@ -192,13 +244,14 @@ export default function Header(props: { slug: string, context: ModelContextProps
                                     }}
                                 >
                                     {page.subMenu.menuItems.map((menuItem, idx) => (
-                                        <MenuItem 
+                                        <MenuItem
                                             key={idx}
                                             onClick={(evt) => {
                                                 menuItem.action();
                                                 page.subMenu.closeMenu();
                                             }}>
-                                                {menuItem.title}
+                                            <ListItemIcon>{menuItem.icon}</ListItemIcon>
+                                            <ListItemText>{menuItem.title}</ListItemText>
                                         </MenuItem>
                                     ))}
                                 </Menu>) :
