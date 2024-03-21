@@ -111,26 +111,24 @@ export default function Header(props: { slug: string, context: ModelContextProps
                         >
                             <List>
                                 {pages.map((page, index) => {
-                                    let listContents = (<>
-                                        <ListItemIcon>{page.icon}</ListItemIcon>
-                                        <ListItemText primary={page.name} />
-                                    </>);
-
-                                    if (page.action || (page.route && page.route.toLowerCase() != slug.toLowerCase())) {
-                                        listContents = (
-                                            <ListItemButton onClick={(e) => {
-                                                if (page.action) {
-                                                    page.action();
-                                                } else if (page.route) {
-                                                    router.push(page.route);
-                                                }
-                                            }}>
-                                                {listContents}
+                                    // if (page.action || (page.route && page.route.toLowerCase() != slug.toLowerCase())) {
+                                        let onClick = undefined;
+                                        if (page.action) {
+                                            onClick = (e: any) => page.action();
+                                        } else if (page.route && page.route.toLowerCase() != slug.toLowerCase()) {
+                                            onClick = (e: any) => router.push(page.route);
+                                        }
+                                    
+                                        let listItem = (
+                                            <ListItem key={index} disablePadding>
+                                            <ListItemButton onClick={onClick} disabled={onClick === undefined} style={{opacity: 1}}>
+                                                <ListItemIcon>{page.icon}</ListItemIcon>
+                                                <ListItemText primary={page.name} />
                                             </ListItemButton>
+                                            </ListItem>
                                         );
-                                    }
+                                    // }
 
-                                    let listItem = (<ListItem key={index} disablePadding>{listContents}</ListItem>)
                                     if (page.subMenu) {
                                         listItem = <>
                                             {listItem}
@@ -139,7 +137,7 @@ export default function Header(props: { slug: string, context: ModelContextProps
                                                 page.subMenu.menuItems.map((item, idx) => {
                                                     return (
                                                         <ListItem disablePadding>
-                                                            <ListItemButton onClick={(e) => item.action()}>
+                                                            <ListItemButton onClick={(e) => item.action()} className="py-0" sx={{ pl: 4 }}>
                                                                 <ListItemIcon>{item.icon}</ListItemIcon>
                                                                 <ListItemText primary={item.title} />
                                                             </ListItemButton>
@@ -155,32 +153,6 @@ export default function Header(props: { slug: string, context: ModelContextProps
                                 })}
                             </List>
                         </Drawer>
-
-                        {/* <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'center',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'left',
-                            }}
-                            open={Boolean(anchorElNav)}
-                            onClose={handleCloseNavMenu}
-                            sx={{
-                                display: { xs: 'block', md: 'none' },
-                            }}
-                        >
-                            {pages.map((page) => (
-                                <MenuItem key={page.name} onClick={handleCloseNavMenu} className="flex">
-                                    {page.icon}
-                                    <Typography textAlign="center">{page.name}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu> */}
                     </Box>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         <img

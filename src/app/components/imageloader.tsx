@@ -8,7 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/system';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Dialog, DialogTitle, Typography } from '@mui/material';
+import { Card, CardActionArea, CardActions, CardContent, CardMedia, Dialog, DialogTitle, Typography } from '@mui/material';
 import { CSSProperties, useState } from 'react';
 
 const COMPONENT_SIZE = '210px';
@@ -16,13 +16,15 @@ const BUTTON_SIZE = '70px';
 const PAPER_MARGIN = '5px';
 
 const STYLES: { [key: string]: CSSProperties } = {
-    mainPaper: {
-        margin: PAPER_MARGIN
+    title: {
     },
-    mainContainer: { 
-        width: COMPONENT_SIZE, 
-        height: COMPONENT_SIZE, 
-        position: 'relative' 
+    mainPaper: {
+        display: "inline-block"
+    },
+    mainContainer: {
+        width: COMPONENT_SIZE,
+        height: COMPONENT_SIZE,
+        position: 'relative'
     },
     addImageButton: {
         position: 'absolute',
@@ -77,6 +79,10 @@ const STYLES: { [key: string]: CSSProperties } = {
             transition: "background-color 0.5s, opacity 0.5s"
         }
     } as any,
+    titleDiv: {
+        padding: '0px 10px 2px 10px',
+        display: 'block',
+    },
     imageButtonsContainer: {
         position: 'relative',
         color: 'white',
@@ -100,8 +106,8 @@ const STYLES: { [key: string]: CSSProperties } = {
             transition: 'color 0.2s'
         }
     } as any,
-    imageButtonIcon: { 
-        width: '100%', 
+    imageButtonIcon: {
+        width: '100%',
         height: '100%'
     },
     lightboxContainer: {
@@ -151,6 +157,13 @@ const ImageLoader = (props: {
         reader.readAsDataURL(file);
     }
 
+    let titleComp = undefined;
+    if (props.title) {
+        titleComp = (
+                <Typography variant="subtitle1" component="div" style={STYLES.titleDiv}>{props.title}</Typography>
+        );
+    }
+
     let hasImg = props.initialDataUrl && props.initialDataUrl.length > 0;
     let displayedComp;
     if (hasImg) {
@@ -195,33 +208,35 @@ const ImageLoader = (props: {
         )
     } else {
         displayedComp = (
-            <Button
-                style={STYLES.addImageButton}
-                component='label'
-            >
-                <div style={STYLES.addImageTextContainer}>
-                    <AddIcon style={STYLES.addImageIcon} />
-                    Add
-                </div>
+            <>
+                <Button
+                    style={STYLES.addImageButton}
+                    component='label'
+                >
+                    <div style={STYLES.addImageTextContainer}>
+                        <AddIcon style={STYLES.addImageIcon} />
+                        Add
+                    </div>
 
-                <input 
-                    type="file" 
-                    onChange={(e) => handleFileSelected(e.target.files as FileList)} 
-                    style={{ display: 'none' }} 
-                />
-            </Button>
+                    <input
+                        type="file"
+                        onChange={(e) => handleFileSelected(e.target.files as FileList)}
+                        style={{ display: 'none' }}
+                    />
+                </Button>
+            </>
         );
     }
 
+
     return (
         <>
-        
-        {props.title && (<Typography variant="body1" component="p">{props.title}</Typography>)}
-        <Paper style={STYLES.mainPaper}>
-            <div style={STYLES.mainContainer}>
+        {titleComp}
+        <Card style={STYLES.mainPaper}>
+            <CardMedia style={STYLES.mainContainer}>
                 {displayedComp}
-            </div>
-        </Paper>
+            </CardMedia>
+        </Card>
         </>
     );
 }

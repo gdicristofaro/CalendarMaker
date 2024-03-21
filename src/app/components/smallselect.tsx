@@ -9,7 +9,7 @@ import Select, { SelectProps } from '@mui/material/Select';
 export default function SmallSelect<Value>(props: { children?: any[], id: string, title: string, minWidth?: number } & SelectProps<Value>) {
     let { children, id, title, minWidth, ...others } = props;
   return (
-    <FormControl sx={{ m: 1, marginLeft: 0, minWidth: minWidth || 230 }} size="small">
+    <FormControl sx={{ m: 1, minWidth: minWidth || 230 }} size="small">
       <InputLabel id={id + "_select_label"}>{title}</InputLabel>
       <Select
         labelId={id + "_select_label"}

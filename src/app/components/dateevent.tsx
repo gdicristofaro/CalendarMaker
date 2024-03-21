@@ -8,7 +8,7 @@ import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDate
 import { DateEventModel, DateTypeInfo, DAYS, MONTHS, WEEK_NUMBER } from '../model/model';
 import dayjs, { Dayjs } from 'dayjs';
 import Paper from '@mui/material/Paper';
-import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Card, CardContent, FormControl, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SmallSelect from './smallselect';
 
@@ -24,6 +24,7 @@ const INPUT_COMP_STYLE = {margin: '0 .5rem'};
 const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
         <div style={{...CELL_STYLE, ...{marginTop: '30px'}}}>
+            <FormControl sx={{ m: 1 }} size="small">
             <DatePicker
                 sx={{
                     "& > div": {
@@ -39,6 +40,7 @@ const getDateSelector = (month: number, day: number, onUpdate: (updated: DateTyp
                 })}
                 // renderInput={(params) => <TextField {...{...{variant: 'standard'}, ...params}} />}
             />
+            </FormControl>
         </div>
     );
 }
@@ -182,6 +184,7 @@ const getWeekdayBeforeSelector = (id: string, month: number, date: number, dayOf
 const getCustomSelector = (dateString: string, onUpdate: (updated: DateTypeInfo) => void) => {
     return (
         <div style={CELL_STYLE}>
+            <FormControl sx={{ m: 1 }} size="small">
             <TextField
                 variant='outlined'
                 size='small'
@@ -189,6 +192,7 @@ const getCustomSelector = (dateString: string, onUpdate: (updated: DateTypeInfo)
                 label="Custom Date"
                 onChange={(evt) => onUpdate({ dateType: 'Custom', identifier: evt.target.value })}
             />
+            </FormControl>
         </div>
     );
 }
@@ -245,6 +249,7 @@ const DateEvent = (props: {
             <div style={{ display: 'flex' }}>
                 <div style={{flexGrow: 1}}>
                     <div>
+                    <FormControl sx={{ m: 1 }} size="small">
                         <TextField
                             size='small'
                             variant='outlined'
@@ -257,6 +262,7 @@ const DateEvent = (props: {
                             title="Event Name"
                             style={INPUT_COMP_STYLE}
                         />
+                        </FormControl>
 
                         <SmallSelect
                             id={id + "_dateType"}
